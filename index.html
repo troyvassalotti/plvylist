@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔥</text></svg>">
+    <title>Plyvlist | Web Audio Component</title>
+    <meta name="description" content="I made a script to let me plug albums or playlists into javascript and have the browser figure it all out.">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;700&family=Red+Hat+Text:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://unpkg.com/sanitize.css" rel="stylesheet" />
+    <link rel="stylesheet" href="dist/css/plvylist.css">
+    <style>
+      html {
+        background-color: #f5f5f5;
+      }
+
+      header {
+        text-align: center;
+      }
+
+      h1 {
+        font-family: "Red Hat Display", Monospace, monospace;
+      }
+
+      header p {
+        font-family: "Red Hat Text", Monospace, monospace;
+      }
+    </style>
+    <script src="src/js/plvylist.js" async></script>
+  </head>
+
+  <body>
+    <main>
+      <header>
+        <h1>Plvylist Demo Page</h1>
+        <p>Take a look at how Plvylist works. You'll be listening to an album I wrote, <i><a href="https://justtroy.bandcamp.com" target="_blank" rel="noopener">Alone in a Crowded Room</a></i>.</p>
+      </header>
+      <div class="plvylist"></div>
+    </main>
+  </body>
+
+</html>
