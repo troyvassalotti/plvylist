@@ -1,5 +1,5 @@
 # Plvylist
-A simple media player for the web built with HTML, CSS (SASS), and JS.
+A simple media player for the web built with HTML, CSS (or SASS), and JS.
 
 ## How to use it
 Add the following to your page:
@@ -18,5 +18,5 @@ Absolutely not, but thanks for thinking it could be.
 
 ## TODO
 - Make it easier to copy and paste
-  - Make it less dependent on SASS
+  - Make it less dependent on SASS by using CSS variables
   - Clean up the structures a bit

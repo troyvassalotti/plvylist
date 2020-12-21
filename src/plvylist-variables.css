@@ -1,0 +1,20 @@
+/* ALL VARIABLES */
+:root {
+  --blue: #0a7ac9;
+  --red: #e53d00;
+  --black: #010101;
+  --white: #f5f5f5;
+  --track-w: 100%;
+  --track-h: .25em;
+  --thumb-d: 1em;
+  --track-c: lightgrey;
+  --fill-c: var(--blue);
+  --thumb-c: var(--black);
+  --buttonColor: var(--blue);
+  --activeColor: var(--blue);
+  --activeBG: #eee;
+  --mainFont: "Red Hat Text", sans-serif;
+  --mainColor: #333;
+  --mainBG: var(--white);
+  --loopColor: var(--red);
+}

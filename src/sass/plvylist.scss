@@ -1,11 +1,8 @@
 // SASS GLOBALS BLOCK
 $blue: #0a7ac9;
 $red: #e53d00;
-$dark: #1e3231;
 $black: #010101;
-$light: #f2f5ea;
 $white: #f5f5f5;
-$pink: #d0a5c0;
 $track-w: 100%;
 $track-h: 0.25em;
 $thumb-d: 1em;
@@ -70,7 +67,6 @@ $loopColor: $red;
   width: 100%;
   max-width: 45em;
   margin: auto;
-  --step--2: clamp(0.9113rem, 0.8922rem + 0.0951vw, 0.96rem);
 
   img {
     max-width: 100%;

@@ -12,20 +12,33 @@
     <link href="https://unpkg.com/sanitize.css" rel="stylesheet" />
     <link rel="stylesheet" href="dist/css/plvylist.css">
     <style>
+      :root {
+        --step--2: clamp(0.9113rem, 0.8922rem + 0.0951vw, 0.96rem);
+        --step--1: clamp(1.0938rem, 1.0523rem + 0.2073vw, 1.2rem);
+        --step-0: clamp(1.3125rem, 1.2393rem + 0.3659vw, 1.5rem);
+        --step-1: clamp(1.575rem, 1.4579rem + 0.5854vw, 1.875rem);
+        --step-2: clamp(1.89rem, 1.7129rem + 0.8854vw, 2.3438rem);
+        --step-3: clamp(2.2681rem, 2.0098rem + 1.2915vw, 2.93rem);
+        --step-4: clamp(2.7219rem, 2.355rem + 1.8341vw, 3.6619rem);
+        --step-5: clamp(3.2656rem, 2.7537rem + 2.5598vw, 4.5775rem);
+      }
+
       html {
         background-color: #f5f5f5;
       }
 
-      header {
-        text-align: center;
+      body {
+        font-size: var(--step--1);
+        font-family: "Red Hat Text", Monospace, monospace;
       }
 
       h1 {
+        font-size: var(--step-3);
         font-family: "Red Hat Display", Monospace, monospace;
       }
 
-      header p {
-        font-family: "Red Hat Text", Monospace, monospace;
+      header {
+        text-align: center;
       }
     </style>
     <script src="src/js/plvylist.js" async></script>
