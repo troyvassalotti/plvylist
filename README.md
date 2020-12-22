@@ -1,10 +1,13 @@
 # Plvylist
 A simple media player for the web built with HTML, CSS (or SASS), and JS.
 
+## Is there a demo?
+Yes. Check out index.html in /demo/ or my [my CodePen for it](https://codepen.io/troyvassalotti/full/ExyOgGV).
+
 ## How to use it
 Add the following to your page:
-- plvylist.js from /dist/js/
-- plvylist.css (plvylist.scss if you have a build process for it) from /src/css/ or /src/sass/
+- plvylist.js from /dist/js/ and edit it with your audio file information
+- plvylist.css (plvylist.scss if you have a build process for it) from /dist/css/ or /dist/sass/
 - an element to latch onto, `<div class="plvylist"></div>`
 
 ## Why did I make this?

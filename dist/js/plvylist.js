@@ -11,7 +11,7 @@ plvyMetaDiv.classList.add("plvy--meta");
 // Since this is made for a single album, there's only one artwork variable, but this could be made to support more.
 const artwork = document.createElement("img");
 const artworkAttributes = {
-  src: "/assets/img/missingart.png",
+  src: "",
   width: "300",
   height: "300",
   alt: "album artwork",
@@ -229,10 +229,10 @@ plvyTracklistDiv.insertAdjacentElement("afterbegin", songs);
 const artworkForTracks = ".jpg", // file location for the artwork
   albumForTracks = "", // name of the album
   artistForTracks = "", // name of the artist
-  filePrefix = "/assets/audio/"; // you want to change this to make sure the linking works, trust me.
+  filePrefix = "/assets/audio/"; // you want to change this to make sure the linking works, trust me. I put this /assets/audio/ directory as an example. This comes in to play when deciding what is the active song and how to highlight it with CSS.
 var allTracks = [], // let this stay empty
   tracks = [{
-    file: filePrefix + ".mp3", // the file name goes in the quotes
+    file: filePrefix + "filename.mp3", // the file name goes in the quotes
     title: "", // name of the track
     artist: artistForTracks,
     album: albumForTracks,
