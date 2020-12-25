@@ -2,7 +2,7 @@
 A simple media player for the web built with HTML, CSS (or SASS), and JS.
 
 ## Is there a demo?
-Yes. Check out index.html in /demo/ or my [my CodePen for it](https://codepen.io/troyvassalotti/full/ExyOgGV).
+Yes. I'm using [Github pages](https://troyvassalotti.github.io/plvylist) for this or my [my CodePen for it](https://codepen.io/troyvassalotti/full/ExyOgGV).
 
 ## How to use it
 Add the following to your page:
