@@ -1,57 +1,64 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔥</text></svg>">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔥</text></svg>"
+    />
     <title>Plyvlist | Web Audio Component</title>
-    <meta name="description" content="I made a script to let me plug albums or playlists into javascript and have the browser figure it all out.">
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;500;700&family=Red+Hat+Text:wght@400;700&display=swap" rel="stylesheet">
-    <link href="https://unpkg.com/sanitize.css" rel="stylesheet" />
-    <link rel="stylesheet" href="dist/css/plvylist.css">
-    <script src="demo/plvylist.js" async></script>
+    <meta
+      name="description"
+      content="I made a script to let me plug albums or playlists into javascript and have the browser figure it all out."
+    />
     <style>
-      :root {
-        --step--2: clamp(0.9113rem, 0.8922rem + 0.0951vw, 0.96rem);
-        --step--1: clamp(1.0938rem, 1.0523rem + 0.2073vw, 1.2rem);
-        --step-0: clamp(1.3125rem, 1.2393rem + 0.3659vw, 1.5rem);
-        --step-1: clamp(1.575rem, 1.4579rem + 0.5854vw, 1.875rem);
-        --step-2: clamp(1.89rem, 1.7129rem + 0.8854vw, 2.3438rem);
-        --step-3: clamp(2.2681rem, 2.0098rem + 1.2915vw, 2.93rem);
-        --step-4: clamp(2.7219rem, 2.355rem + 1.8341vw, 3.6619rem);
-        --step-5: clamp(3.2656rem, 2.7537rem + 2.5598vw, 4.5775rem);
-      }
-
       html {
         background-color: #f5f5f5;
+        font-family: Monospace, monospace;
       }
 
       body {
-        font-size: var(--step--1);
-        font-family: "Red Hat Text", Monospace, monospace;
+        font-size: clamp(1.0938rem, 1.0523rem + 0.2073vw, 1.2rem);
       }
 
       h1 {
-        font-size: var(--step-3);
-        font-family: "Red Hat Display", Monospace, monospace;
+        font-size: clamp(2.2681rem, 2.0098rem + 1.2915vw, 2.93rem);
       }
 
       header {
         text-align: center;
       }
+
+      header a {
+        font-style: italic;
+      }
     </style>
+    <script type="module" src="demo/plvylist-component.js" defer></script>
   </head>
 
   <body>
     <main>
       <header>
         <h1>Plvylist Demo Page</h1>
-        <p>Take a look at how Plvylist works. You'll be listening to an album I wrote, <i><a href="https://justtroy.bandcamp.com" target="_blank" rel="noopener">Alone in a Crowded Room</a></i>.</p>
+        <p>
+          Take a look at how Plvylist works. You'll be listening to an album I
+          wrote,
+          <a href="https://justtroy.bandcamp.com" target="_blank" rel="noopener"
+            >Alone in a Crowded Room</a
+          >.
+        </p>
       </header>
-      <div class="plvylist"></div>
+      <plvylist-player
+        audio-location="demo/audio/"
+        album-name="Alone"
+        artist-name="Action Hamilton"
+        placeholder-image="demo/img/missingart.png"
+        cover-art="demo/img/aiacr.jpg"
+        starting-volume="0.5"
+        starting-time="0"
+      >
+      </plvylist-player>
     </main>
   </body>
-
 </html>
