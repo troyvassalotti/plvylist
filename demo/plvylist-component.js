@@ -1,6 +1,6 @@
 "use strict";
 
-import tracks from "../demo/tracks.js";
+import tracks from "./tracks.js";
 
 class Plvylist extends HTMLElement {
     constructor() {
