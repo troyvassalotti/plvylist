@@ -13,10 +13,22 @@ A simple media player web component.
 Yes and it's on [GitHub pages](https://troyvassalotti.github.io/plvylist).
 
 ## How to use it
-- download the js file from this place
-- add this html snippet to your page
-- change these attributes because they're required
-- change these attributes if you want to.
+- Download `plvylist-component.js` from dist/v2 (you probably want the minified version).
+    - If you're feeling ambitious, you can use dist/v1 instead; however, I am not maintaing that version anymore. While it should be fine to work with, please don't ask me to fix anything.
+- Add `<plvylist-player></plvylist-player>` to the HTML page you want to stream music from.
+- The following attributes are required to be added to the HTML (see the demo or index.html in this repo):
+    - audio-location="location/to/files/"
+    - album-name="Name of the album/collection"
+    - artist-name="Name of the artist if there's only one"
+    - placeholder-image="path/to/placeholder.jpg"
+    - cover-art="path/to/general-cover-art.jpg"
+- You can do some customization with these attributes:
+    - starting-volume="some number between 0.0 and 1"
+    - starting-time="honestly I don't know but it is a number"
+
+All the styles, functionality, and HTML is built into the file. You can edit the `svg` icons if you wish via the `constructor()` but keep it to the _inside_ of the element and don't declare a new `svg` or else it'll break. You'll need to do further customization for that sort of thing.
+
+You can choose to import or link to your own stylesheets if you know exactly what the path to them is. Just add the `@import` statements of `<link>` to them within the template literal.
 
 ## Why did I make this?
 I wanted to learn web audio, specifically the Media Element API, so I made a basic V1. Then I wanted to turn it into a web component, so I did that too.
@@ -26,3 +38,5 @@ I wanted to learn web audio, specifically the Media Element API, so I made a bas
 
 ## Ideas for Improvement
 - Allow the option to fetch the track list from a remote location and dynamically generate things like track names, artists, etc.
+- Add option to import modules for things like the track list.
+- Move the function declarations out of the `connectedCallback()` function and into their own levels (I tried this and could only get so far since everything is so tightly wound together at the moment).
