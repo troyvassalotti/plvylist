@@ -14,7 +14,7 @@ Yes and it's on [GitHub pages](https://troyvassalotti.github.io/plvylist).
 
 ## How to use it
 - Download `plvylist-component.js` from dist/v2 (you probably want the minified version).
-    - If you're feeling ambitious, you can use dist/v1 instead; however, I am not maintaing that version anymore. While it should be fine to work with, please don't ask me to fix anything.
+    - If you're feeling ambitious, you can use dist/v1 instead; however, I am not maintaining that version anymore. While it should be fine to work with, please don't ask me to fix anything.
 - Add `<plvylist-player></plvylist-player>` to the HTML page you want to stream music from.
 - The following attributes are required to be added to the HTML (see the demo or index.html in this repo):
     - audio-location="location/to/files/"
