@@ -1,4 +1,4 @@
-export const tracks = [
+export default [
     {
         file: this.getAttribute("audio-location") + "01_I_Know_I'm_Not.mp3" || '',
         title: "I Know I'm Not" || '',
