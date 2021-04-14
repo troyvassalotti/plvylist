@@ -117,17 +117,18 @@ class Plvylist extends HTMLElement {
                     --track-height: .25em;
                     --track-color: var(--color-contrast-1);
                     --thumb-diameter: 1em;
-                    --thumb-color: var(--color-base);
+                    --thumb-color: var(--color-layout);
                     --fill-color: var(--color-primary);
                     --button-color: var(--color-primary);
                     --active-color: var(--color-primary);
-                    --active-background: var(--color-contrast-2);
+                    --active-background: var(--color-contrast-1);
+                    --active-text: var(--color-primary);
                     --font-family: Monospace, monospace;
                     --font-size-responsive: clamp(0.9113rem, 0.8922rem + 0.0951vw, 0.96rem);
-                    --font-color: var(--color-base);
-                    --main-background: var(--color-layout);
+                    --font-color: var(--color-layout);
+                    --main-background: var(--color-base);
                     --loop-color: var(--color-changed);
-                    --artwork-shadow: var(--color-base);
+                    --artwork-shadow: var(--color-layout);
                     padding: .5em;
                     font-family: var(--font-family);
                     font-size: 16px;
@@ -223,6 +224,7 @@ class Plvylist extends HTMLElement {
 
                 .song:hover {
                     background: var(--active-background);
+                    color: var(--active-text);
                 }
 
                 .song__active {
@@ -370,6 +372,21 @@ class Plvylist extends HTMLElement {
                         display: grid;
                         grid-template-columns: 18.75rem 1fr;
                         align-items: end;
+                    }
+                }
+                
+                @media (prefers-color-scheme: light) {
+                    .container {
+                        --track-color: var(--color-base);
+                        --fill-color: var(--color-primary);
+                        --thumb-color: var(--color-base);
+                        --button-color: var(--color-primary);
+                        --active-color: var(--color-primary);
+                        --active-background: var(--color-contrast-2);
+                        --font-color: currentColor;
+                        --artwork-shadow: var(--color-base);
+                        --active-text: var(--color-base);
+                        --main-background: var(--color-layout);
                     }
                 }
             </style>

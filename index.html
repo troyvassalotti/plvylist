@@ -1,64 +1,73 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link
-      rel="icon"
-      href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔥</text></svg>"
+            rel="icon"
+            href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔥</text></svg>"
     />
     <title>Plyvlist | Web Audio Component</title>
     <meta
-      name="description"
-      content="I made a script to let me plug albums or playlists into javascript and have the browser figure it all out."
+            name="description"
+            content="I made a script to let me plug albums or playlists into javascript and have the browser figure it all out."
     />
     <style>
-      html {
-        background-color: #f5f5f5;
-        font-family: Monospace, monospace;
-      }
+        html {
+            background-color: #010101;
+            color: #f5f5f5;
+            font-family: Monospace, monospace;
+        }
 
-      body {
-        font-size: clamp(1.0938rem, 1.0523rem + 0.2073vw, 1.2rem);
-      }
+        body {
+            font-size: clamp(1.0938rem, 1.0523rem + 0.2073vw, 1.2rem);
+        }
 
-      h1 {
-        font-size: clamp(2.2681rem, 2.0098rem + 1.2915vw, 2.93rem);
-      }
+        h1 {
+            font-size: clamp(2.2681rem, 2.0098rem + 1.2915vw, 2.93rem);
+        }
 
-      header {
-        text-align: center;
-      }
+        header {
+            text-align: center;
+        }
 
-      header a {
-        font-style: italic;
-      }
+        header a {
+            font-style: italic;
+            color: currentColor;
+        }
+
+        @media (prefers-color-scheme: light) {
+            html {
+                background-color: #f5f5f5;
+                color: #010101;
+            }
+        }
     </style>
-    <script type="module" src="demo/plvylist-component.js" defer></script>
-  </head>
+    <script src="./demo/plvylist-component.js"></script>
+</head>
 
-  <body>
-    <main>
-      <header>
+<body>
+<main>
+    <header>
         <h1>Plvylist Demo Page</h1>
         <p>
-          Take a look at how Plvylist works. You'll be listening to an album I
-          wrote,
-          <a href="https://justtroy.bandcamp.com" target="_blank" rel="noopener"
+            Take a look at how Plvylist works. You'll be listening to an album I
+            wrote,
+            <a href="https://justtroy.bandcamp.com" target="_blank" rel="noopener"
             >Alone in a Crowded Room</a
-          >.
+            >.
         </p>
-      </header>
-      <plvylist-player
-        audio-location="./demo/audio/"
-        album-name="Alone In A Crowded Room"
-        artist-name="troy."
-        placeholder-image="./demo/img/missingart.png"
-        cover-art="./demo/img/aiacr.jpg"
-        starting-volume="0.5"
-        starting-time="0"
-      >
-      </plvylist-player>
-    </main>
-  </body>
+    </header>
+    <plvylist-player
+            album-name="Alone In A Crowded Room"
+            artist-name="troy."
+            audio-location="./demo/audio/"
+            cover-art="./demo/img/aiacr.jpg"
+            placeholder-image="./demo/img/missingart.png"
+            starting-time="0"
+            starting-volume="0.5"
+    >
+    </plvylist-player>
+</main>
+</body>
 </html>
