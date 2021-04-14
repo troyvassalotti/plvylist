@@ -1,5 +1,7 @@
 "use strict";
 
+import tracks from "./tracks.js";
+
 class Plvylist extends HTMLElement {
     constructor() {
         super();
@@ -13,92 +15,7 @@ class Plvylist extends HTMLElement {
         this.volIconMid = `<title>Volume</title><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 8a5 5 0 0 1 0 8" /><path d="M17.7 5a9 9 0 0 1 0 14" /><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5" />`;
         this.volIconOff = `<title>Volume</title><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5" /><path d="M16 10l4 4m0 -4l-4 4" />`;
         this.volIconLow = `<title>Volume</title><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 8a5 5 0 0 1 0 8" /><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5" />`;
-        this.tracks = [
-            {
-                file: this.getAttribute("audio-location") + "01_I_Know_I'm_Not.mp3" || '',
-                title: "I Know I'm Not" || '',
-                artist: this.getAttribute("artist-name") || '',
-                album: this.getAttribute("album-name")  || '',
-                artwork: this.getAttribute("cover-art")  || this.getAttribute("placeholder-image")
-            },
-            {
-                file: this.getAttribute("audio-location") + "02_Baby_Blue.mp3" || '',
-                title: "Baby Blue" || '',
-                artist: this.getAttribute("artist-name") || '',
-                album: this.getAttribute("album-name")  || '',
-                artwork: this.getAttribute("cover-art")  || this.getAttribute("placeholder-image")
-            },
-            {
-                file: this.getAttribute("audio-location") + "03_Insincerity.mp3" || '',
-                title: "Insincerity" || '',
-                artist: this.getAttribute("artist-name") || '',
-                album: this.getAttribute("album-name")  || '',
-                artwork: this.getAttribute("cover-art")  || this.getAttribute("placeholder-image")
-            },
-            {
-                file: this.getAttribute("audio-location") + "04_Like_Sinking.mp3" || '',
-                title: "Like Sinking" || '',
-                artist: this.getAttribute("artist-name") || '',
-                album: this.getAttribute("album-name")  || '',
-                artwork: this.getAttribute("cover-art")  || this.getAttribute("placeholder-image")
-            },
-            {
-                file: this.getAttribute("audio-location") + "05_Do_Better.mp3" || '',
-                title: "Do Better" || '',
-                artist: this.getAttribute("artist-name") || '',
-                album: this.getAttribute("album-name")  || '',
-                artwork: this.getAttribute("cover-art")  || this.getAttribute("placeholder-image")
-            },
-            {
-                file: this.getAttribute("audio-location") + "06_Market_Street.mp3",
-                title: "Market Street",
-                artist: this.getAttribute("artist-name") || '',
-                album: this.getAttribute("album-name") || '',
-                artwork: this.getAttribute("cover-art") || this.getAttribute("placeholder-image")
-            },
-            {
-                file: this.getAttribute("audio-location") + "07_Alone_In_a_Crowded_Room.mp3",
-                title: "Alone In A Crowded Room",
-                artist: this.getAttribute("artist-name") || '',
-                album: this.getAttribute("album-name") || '',
-                artwork: this.getAttribute("cover-art") || this.getAttribute("placeholder-image")
-            },
-            {
-                file: this.getAttribute("audio-location") + "08_Long_Time_Caller_First Time List.mp3",
-                title: "Long Time Caller, First Time Listener",
-                artist: this.getAttribute("artist-name") || '',
-                album: this.getAttribute("album-name") || '',
-                artwork: this.getAttribute("cover-art") || this.getAttribute("placeholder-image")
-            },
-            {
-                file: this.getAttribute("audio-location") + "09_Detroit.mp3",
-                title: "Detroit",
-                artist: this.getAttribute("artist-name") || '',
-                album: this.getAttribute("album-name") || '',
-                artwork: this.getAttribute("cover-art") || this.getAttribute("placeholder-image")
-            },
-            {
-                file: this.getAttribute("audio-location") + "10_We_Can't_Rush_These_Things.mp3",
-                title: "We Can't Rush These Things",
-                artist: this.getAttribute("artist-name") || '',
-                album: this.getAttribute("album-name") || '',
-                artwork: this.getAttribute("cover-art") || this.getAttribute("placeholder-image")
-            },
-            {
-                file: this.getAttribute("audio-location") + "11_Closure.mp3",
-                title: "Closure",
-                artist: this.getAttribute("artist-name") || '',
-                album: this.getAttribute("album-name") || '',
-                artwork: this.getAttribute("cover-art") || this.getAttribute("placeholder-image")
-            },
-            {
-                file: this.getAttribute("audio-location") + "12_Like_Drowning_(Bonus_Track).mp3",
-                title: "Like Drowning (Bonus Track)",
-                artist: this.getAttribute("artist-name") || '',
-                album: this.getAttribute("album-name") || '',
-                artwork: this.getAttribute("cover-art") || this.getAttribute("placeholder-image")
-            }
-        ];
+        this.tracks = tracks;
     }
 
     connectedCallback() {
