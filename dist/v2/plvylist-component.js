@@ -28,6 +28,7 @@ class Plvylist extends HTMLElement {
         const { shadowRoot } = this;
         shadowRoot.innerHTML = `
             <style>
+                @import "https://unpkg.com/sanitize.css";
                 .container {
                     --color-primary: #0a7ac9;
                     --color-changed: #e53d00;

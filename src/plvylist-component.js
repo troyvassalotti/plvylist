@@ -28,6 +28,7 @@ class Plvylist extends HTMLElement {
         const { shadowRoot } = this;
         shadowRoot.innerHTML = `
             <style>
+                @import "https://unpkg.com/sanitize.css";
                 .container {
                     --color-primary: #0a7ac9;
                     --color-changed: #e53d00;
@@ -40,15 +41,15 @@ class Plvylist extends HTMLElement {
                     --track-color: var(--color-contrast-1);
                     --thumb-diameter: 1em;
                     --thumb-color: var(--color-layout);
-                    --fill-color: var(--color-contrast-2);
+                    --fill-color: var(--color-primary);
                     --button-color: var(--color-primary);
-                    --active-color: var(--color-contrast-2);
+                    --active-color: var(--color-primary);
                     --active-background: var(--color-contrast-1);
-                    --active-text: var(--color-layout);
+                    --active-text: var(--color-primary);
                     --font-family: Monospace, monospace;
                     --font-size-responsive: clamp(0.9113rem, 0.8922rem + 0.0951vw, 0.96rem);
                     --font-color: var(--color-layout);
-                    --main-background: var(--color-layout);
+                    --main-background: var(--color-base);
                     --loop-color: var(--color-changed);
                     --artwork-shadow: var(--color-layout);
                     padding: .5em;
