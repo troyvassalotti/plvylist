@@ -16,7 +16,7 @@ img#artwork {
 }
 
 .meta {
-  align-items: end;
+  align-items: flex-end;
   display: flex;
   flex-wrap: wrap;
   gap: 1em;

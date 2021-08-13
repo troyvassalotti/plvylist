@@ -4,6 +4,7 @@
     <enabled-global>
       <option value="SCSS" />
       <option value="clean-css-cli" />
+      <option value="Terser" />
     </enabled-global>
   </component>
 </project>
