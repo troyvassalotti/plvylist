@@ -1,0 +1,89 @@
+.plvylist {
+    --accent: dodgerblue;
+    --changed: crimson;
+    --contrast-1: hsl(0, 0%, 50%);
+    --contrast-2: hsl(0, 0%, 70%, .3);
+    accent-color: var(--accent);
+    font-family: inherit;
+    margin: auto;
+    width: 100%;
+}
+
+img#artwork {
+    box-shadow: 0 0 5px 1px var(--contrast-1);
+    height: auto;
+    max-width: 100%;
+}
+
+.meta {
+    align-items: end;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1em;
+}
+
+.track-info p:not(:last-of-type) {
+    margin-block-end: .5rem;
+    margin-block-start: 0;
+}
+
+#fwd {
+    margin-inline-end: auto;
+}
+
+#loop.loop--active svg {
+    stroke: var(--changed);
+}
+
+.seeker {
+    margin-block-end: 1rem;
+    margin-block-start: 1rem;
+}
+
+.volume {
+    display: inline-flex;
+}
+
+:is(.controls, .song) button {
+    background: none;
+    border: none;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    stroke: currentColor;
+}
+
+.controls {
+    align-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+
+  button:hover svg {
+    stroke: var(--accent);
+  }
+}
+
+.controls__primary {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    width: 100%;
+}
+
+#songs {
+    line-height: 1.5;
+}
+
+.song:hover {
+    background: var(--contrast-2);
+}
+
+.song__active button, .song__title:hover {
+    color: var(--accent);
+}
+
+input[type="range"] {
+    max-width: 100%;
+    width: 100%;
+}
