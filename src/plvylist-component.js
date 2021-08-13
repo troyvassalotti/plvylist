@@ -17,7 +17,7 @@ class Plvylist extends HTMLElement {
     const { shadowRoot } = this;
     shadowRoot.innerHTML = `
             <style>
-                @import '/src/plvy.css'
+                @import 'src/plvy.min.css'
             </style>
 
             <div class="plvylist">
