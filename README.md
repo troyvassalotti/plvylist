@@ -14,6 +14,6 @@ A simple media player web component. I'm always thinking of ways to improve this
     - starting-volume="some number between 0.0 and 1"
     - starting-time="honestly I don't know, but it is a number"
 
-All te styles and HTML are built in to the component and intended to inherit whatever the outer container uses. You can edit the `svg` icons if you wish via the `constructor()` but keep it to the _inside_ of the element and don't declare a new `svg` or else it'll break. You'll need to do further customization for that sort of thing.
+All the CSS and HTML are built into the component and intended to inherit whatever the outer container uses. You can edit the `svg` icons if you wish via the `constructor()` but keep it to the _inside_ of the element and don't declare a new `svg` or else it'll break. You'll need to do further customization for that sort of thing.
 
 You can choose to import or link to your own stylesheets if you know exactly what the path to them is. Just add the `@import` statements within the template literal.
