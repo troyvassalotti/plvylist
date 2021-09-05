@@ -2,17 +2,16 @@
   --accent: dodgerblue;
   --changed: crimson;
   --contrast-1: hsl(0, 0%, 50%);
-  --contrast-2: hsl(0, 0%, 70%, .3);
+  --contrast-2: hsl(0, 0%, 70%, 0.3);
   accent-color: var(--accent);
   font-family: inherit;
+  inline-size: 100%;
   margin: auto;
-  width: 100%;
 }
 
 img#artwork {
-  box-shadow: 0 0 5px 1px var(--contrast-1);
-  height: auto;
-  max-width: 100%;
+  block-size: auto;
+  max-inline-size: 100%;
 }
 
 .meta {
@@ -66,8 +65,8 @@ img#artwork {
 .controls__primary {
   display: flex;
   flex: 1;
+  inline-size: 100%;
   justify-content: center;
-  width: 100%;
 }
 
 #songs {
@@ -78,13 +77,14 @@ img#artwork {
   background: var(--contrast-2);
 }
 
-.song__active button, .song__title:hover {
+.song__active button,
+.song__title:hover {
   color: var(--accent);
 }
 
 input[type=range] {
-  max-width: 100%;
-  width: 100%;
+  inline-size: 100%;
+  max-inline-size: 100%;
 }
 
 /*# sourceMappingURL=plvy.css.map */
