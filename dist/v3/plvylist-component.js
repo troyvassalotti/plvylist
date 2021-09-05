@@ -11,6 +11,7 @@ class Plvylist extends HTMLElement {
     this.volIconMid = `<title>Volume</title><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 8a5 5 0 0 1 0 8" /><path d="M17.7 5a9 9 0 0 1 0 14" /><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5" />`;
     this.volIconOff = `<title>Volume</title><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5" /><path d="M16 10l4 4m0 -4l-4 4" />`;
     this.volIconLow = `<title>Volume</title><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 8a5 5 0 0 1 0 8" /><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5" />`;
+    this.placeholder = `data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIGlkPSJDYXBhXzEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeD0iMHB4IiB5PSIwcHgiIHZpZXdCb3g9IjAgMCA2MCA2MCIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgNjAgNjA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj48Zz48cGF0aCBkPSJNMzAsMEMxMy40NTgsMCwwLDEzLjQ1OCwwLDMwczEzLjQ1OCwzMCwzMCwzMHMzMC0xMy40NTgsMzAtMzBTNDYuNTQyLDAsMzAsMHogTTMwLDU4QzE0LjU2MSw1OCwyLDQ1LjQzOSwyLDMwUzE0LjU2MSwyLDMwLDJzMjgsMTIuNTYxLDI4LDI4UzQ1LjQzOSw1OCwzMCw1OHoiLz48cGF0aCBkPSJNMjMuMTY1LDguNDU5YzAuNTM3LTAuMTMsMC44NjgtMC42NywwLjczOS0xLjIwNmMtMC4xMjktMC41MzctMC42Ny0wLjg2Ni0xLjIwNi0wLjczOWMtMy45MzUsMC45NDYtNy41MjIsMi45NTUtMTAuMzc2LDUuODA5UzcuNDYsMTguNzY0LDYuNTE0LDIyLjY5OGMtMC4xMjksMC41MzYsMC4yMDIsMS4wNzYsMC43MzksMS4yMDZjMC4wNzgsMC4wMTksMC4xNTcsMC4wMjcsMC4yMzQsMC4wMjdjMC40NTEsMCwwLjg2MS0wLjMwOCwwLjk3Mi0wLjc2N2MwLjg1OS0zLjU3NSwyLjY4NS02LjgzNiw1LjI3Ny05LjQyOVMxOS41OSw5LjMxOCwyMy4xNjUsOC40NTl6Ii8+PHBhdGggZD0iTTUyLjc0NywzNi4wOTZjLTAuNTM4LTAuMTI5LTEuMDc3LDAuMjAxLTEuMjA2LDAuNzM5Yy0wLjg1OSwzLjU3NS0yLjY4NSw2LjgzNi01LjI3Nyw5LjQyOXMtNS44NTQsNC40MTgtOS40Myw1LjI3N2MtMC41MzcsMC4xMy0wLjg2OCwwLjY3LTAuNzM5LDEuMjA2YzAuMTEsMC40NTksMC41MjEsMC43NjcsMC45NzIsMC43NjdjMC4wNzcsMCwwLjE1Ni0wLjAwOSwwLjIzNC0wLjAyN2MzLjkzNi0wLjk0Niw3LjUyMy0yLjk1NSwxMC4zNzctNS44MDlzNC44NjItNi40NDEsNS44MDktMTAuMzc2QzUzLjYxNSwzNi43NjYsNTMuMjg0LDM2LjIyNiw1Mi43NDcsMzYuMDk2eiIvPjxwYXRoIGQ9Ik0yNC40NTIsMTMuMjg2YzAuNTM4LTAuMTI1LDAuODczLTAuNjYzLDAuNzQ3LTEuMmMtMC4xMjUtMC41MzgtMC42NjUtMC44NzgtMS4yLTAuNzQ3Yy0zLjA5LDAuNzItNS45MDQsMi4yODItOC4xNDEsNC41MmMtMi4yMzcsMi4yMzYtMy44LDUuMDUxLTQuNTIsOC4xNDFjLTAuMTI2LDAuNTM3LDAuMjA5LDEuMDc1LDAuNzQ3LDEuMmMwLjA3NiwwLjAxOSwwLjE1MiwwLjAyNiwwLjIyOCwwLjAyNmMwLjQ1NCwwLDAuODY1LTAuMzEyLDAuOTczLTAuNzczYzAuNjM1LTIuNzI1LDIuMDE0LTUuMjA3LDMuOTg2LTcuMThTMjEuNzI4LDEzLjkyMSwyNC40NTIsMTMuMjg2eiIvPjxwYXRoIGQ9Ik00OC42NjEsMzYuMDAxYzAuMTI2LTAuNTM3LTAuMjA5LTEuMDc1LTAuNzQ3LTEuMmMtMC41MzgtMC4xMzMtMS4wNzUsMC4yMDktMS4yLDAuNzQ3Yy0wLjYzNSwyLjcyNS0yLjAxNCw1LjIwNy0zLjk4Niw3LjE4cy00LjQ1NSwzLjM1Mi03LjE4LDMuOTg2Yy0wLjUzOCwwLjEyNS0wLjg3MywwLjY2My0wLjc0NywxLjJjMC4xMDcsMC40NjIsMC41MTksMC43NzMsMC45NzMsMC43NzNjMC4wNzUsMCwwLjE1MS0wLjAwOCwwLjIyOC0wLjAyNmMzLjA5LTAuNzIsNS45MDQtMi4yODIsOC4xNDEtNC41MkM0Ni4zNzksNDEuOTA1LDQ3Ljk0MSwzOS4wOTEsNDguNjYxLDM2LjAwMXoiLz48cGF0aCBkPSJNMjYuNDk1LDE2LjkyNWMtMC4xMTktMC41NDEtMC42NTMtMC44NzktMS4xOS0wLjc2M2MtNC41NTcsMC45OTctOC4xNDYsNC41ODYtOS4xNDMsOS4xNDNjLTAuMTE4LDAuNTM5LDAuMjI0LDEuMDcyLDAuNzYzLDEuMTljMC4wNzIsMC4wMTYsMC4xNDQsMC4wMjMsMC4yMTUsMC4wMjNjMC40NiwwLDAuODczLTAuMzE4LDAuOTc2LTAuNzg2YzAuODMxLTMuNzk2LDMuODIxLTYuNzg2LDcuNjE3LTcuNjE3QzI2LjI3MSwxNy45OTcsMjYuNjEzLDE3LjQ2NCwyNi40OTUsMTYuOTI1eiIvPjxwYXRoIGQ9Ik00My44MzgsMzQuNjk1YzAuMTE4LTAuNTM5LTAuMjI0LTEuMDcyLTAuNzYzLTEuMTljLTAuNTQtMC4xMTgtMS4wNzIsMC4yMjItMS4xOSwwLjc2M2MtMC44MzEsMy43OTYtMy44MjEsNi43ODYtNy42MTcsNy42MTdjLTAuNTM5LDAuMTE4LTAuODgxLDAuNjUxLTAuNzYzLDEuMTljMC4xMDMsMC40NjgsMC41MTYsMC43ODYsMC45NzYsMC43ODZjMC4wNzEsMCwwLjE0My0wLjAwOCwwLjIxNS0wLjAyM0MzOS4yNTIsNDIuODQxLDQyLjg0MSwzOS4yNTIsNDMuODM4LDM0LjY5NXoiLz48cGF0aCBkPSJNMzguMDgsMzBjMC00LjQ1NS0zLjYyNS04LjA4LTguMDgtOC4wOHMtOC4wOCwzLjYyNS04LjA4LDguMDhzMy42MjUsOC4wOCw4LjA4LDguMDhTMzguMDgsMzQuNDU1LDM4LjA4LDMweiBNMzAsMzYuMDhjLTMuMzUzLDAtNi4wOC0yLjcyOC02LjA4LTYuMDhzMi43MjgtNi4wOCw2LjA4LTYuMDhzNi4wOCwyLjcyOCw2LjA4LDYuMDhTMzMuMzUzLDM2LjA4LDMwLDM2LjA4eiIvPjwvZz48L3N2Zz4=`;
   }
 
   connectedCallback() {
@@ -20,9 +21,7 @@ class Plvylist extends HTMLElement {
             <div class="plvylist">
                 <audio id="plvylist"></audio>
                 <div class="meta">
-                    <img src="${this.getAttribute(
-                      "placeholder"
-                    )}" alt="album artwork" id="artwork" width="300" height="300">
+                    <img src="${this.placeholder}" alt="album artwork" id="artwork" width="300" height="300">
                     <div class="track-info">
                         <p class="artist">--</p>
                         <p class="track">--</p>
@@ -79,7 +78,7 @@ class Plvylist extends HTMLElement {
         `;
 
     // set some variables for later
-    const placeholderImage = this.getAttribute("placeholder");
+    const placeholderImage = this.placeholder;
     const tracksLocation = this.getAttribute("tracks");
     const playIcon = this.playIcon;
     const pauseIcon = this.pauseIcon;
