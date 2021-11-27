@@ -3,10 +3,6 @@ class Plvylist extends HTMLElement {
     super();
     this.attachShadow({ mode: "open" });
     this.playIcon = `<title>Play</title><path d="M7 4v16l13 -8z"/>`;
-    this.fwdIcon = `<title>Next</title><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M3 5v14l8-7z"></path><path d="M14 5v14l8-7z"></path>`;
-    this.bkwdIcon = `<title>Previous</title><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M21 5v14l-8 -7z"></path><path d="M10 5v14l-8 -7z"></path>`;
-    this.loopIcon = `<title>Loop</title><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M4 12v-3a3 3 0 0 1 3 -3h13m-3 -3l3 3l-3 3"></path><path d="M20 12v3a3 3 0 0 1 -3 3h-13m3 3l-3-3l3-3"></path><path d="M11 11l1 -1v4"></path>`;
-    this.shuffleIcon = `<title>Shuffle</title><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><rect x="3" y="3" width="6" height="6" rx="1"></rect><rect x="15" y="15" width="6" height="6" rx="1"></rect><path d="M21 11v-3a2 2 0 0 0 -2 -2h-6l3 3m0 -6l-3 3"></path><path d="M3 13v3a2 2 0 0 0 2 2h6l-3 -3m0 6l3 -3"></path>`;
     this.pauseIcon = `<title>Pause</title><path stroke="none" d="M0 0h24v24H0z" fill="none"/><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" />`;
     this.volIconMid = `<title>Volume</title><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 8a5 5 0 0 1 0 8" /><path d="M17.7 5a9 9 0 0 1 0 14" /><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5" />`;
     this.volIconOff = `<title>Volume</title><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5" /><path d="M16 10l4 4m0 -4l-4 4" />`;
@@ -17,7 +13,25 @@ class Plvylist extends HTMLElement {
   connectedCallback() {
     const { shadowRoot } = this;
     shadowRoot.innerHTML = `
-            <style>.plvylist{--accent:dodgerblue;--changed:crimson;--contrast-1:hsl(0, 0%, 50%);--contrast-2:hsl(0, 0%, 70%, 0.3);accent-color:var(--accent);font-family:inherit;inline-size:100%;margin:auto}img#artwork{block-size:auto;max-inline-size:100%}.meta{align-items:flex-end;display:flex;flex-wrap:wrap;gap:1em}.track-info p:not(:last-of-type){margin-block-end:0.5rem;margin-block-start:0}#fwd{margin-inline-end:auto}#loop.loop--active svg{stroke:var(--changed)}.seeker{margin-block-end:1rem;margin-block-start:1rem}.volume{display:inline-flex}:is(.controls,.song) button{background:0 0;border:none;color:inherit;cursor:pointer;font:inherit;stroke:currentColor}.controls{align-items:center;display:flex;flex-wrap:wrap;justify-content:center}.controls button:hover svg{stroke:var(--accent)}.controls__primary{display:flex;flex:1;inline-size:100%;justify-content:center}#songs{line-height:1.5}.song:hover{background:var(--contrast-2)}.song__active button,.song__title:hover{color:var(--accent)}input[type=range]{inline-size:100%;max-inline-size:100%}</style>
+            <style>
+                .plvylist {--accent: dodgerblue; --changed: crimson; --contrast-1: hsl(0, 0%, 50%); --contrast-2: hsl(0, 0%, 70%, 0.3); accent-color: var(--accent); font-family: inherit; inline-size: 100%; margin: auto;}
+                img#artwork {block-size: auto; max-inline-size: 100%;}
+                .meta {align-items: flex-end; display: flex; flex-wrap: wrap; gap: 1em;}
+                .track-info p:not(:last-of-type) {margin-block-end: 0.5rem; margin-block-start: 0;}
+                #fwd {margin-inline-end: auto;}
+                #loop.loop--active svg {stroke: var(--changed);}
+                .seeker {margin-block: 1rem;}
+                .volume {display: inline-flex;}
+                :is(.controls, .song) button {background: none; border: none; color: inherit; cursor: pointer; font: inherit; stroke: currentColor;}
+                .controls {align-items: center; display: flex; flex-wrap: wrap; justify-content: center;}
+                .controls button:hover svg {stroke: var(--accent);}
+                .controls__primary {display: flex; flex: 1; inline-size: 100%; justify-content: center;}
+                #songs {line-height: 1.5;}
+                .song:hover {background: var(--contrast-2);}
+                .song__active button,
+                .song__title:hover {color: var(--accent);}
+                input[type=range] {inline-size: 100%; max-inline-size: 100%;}
+            </style>
             <div class="plvylist">
                 <audio id="plvylist"></audio>
                 <div class="meta">
@@ -36,7 +50,7 @@ class Plvylist extends HTMLElement {
                     <div class="controls__primary">
                         <button id="bkwd">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                                ${this.bkwdIcon}
+                                <title>Previous</title><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M21 5v14l-8 -7z"></path><path d="M10 5v14l-8 -7z"></path>
                             </svg>
                         </button>
                         <button id="action">
@@ -46,17 +60,17 @@ class Plvylist extends HTMLElement {
                         </button>
                         <button id="fwd">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                                ${this.fwdIcon}
+                                <title>Next</title><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M3 5v14l8-7z"></path><path d="M14 5v14l8-7z"></path>
                             </svg>
                         </button>
                         <button id="shuffle">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                                ${this.shuffleIcon}
+                                <title>Shuffle</title><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><rect x="3" y="3" width="6" height="6" rx="1"></rect><rect x="15" y="15" width="6" height="6" rx="1"></rect><path d="M21 11v-3a2 2 0 0 0 -2 -2h-6l3 3m0 -6l-3 3"></path><path d="M3 13v3a2 2 0 0 0 2 2h6l-3 -3m0 6l3 -3"></path>
                             </svg>
                         </button>
                         <button id="loop">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                                ${this.loopIcon}
+                                <title>Loop</title><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M4 12v-3a3 3 0 0 1 3 -3h13m-3 -3l3 3l-3 3"></path><path d="M20 12v3a3 3 0 0 1 -3 3h-13m3 3l-3-3l3-3"></path><path d="M11 11l1 -1v4"></path>
                             </svg>
                         </button>
                     </div>

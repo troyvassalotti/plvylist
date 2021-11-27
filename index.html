@@ -3,41 +3,22 @@
 <head>
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <link
-            rel="icon"
-            href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔥</text></svg>"
-    />
     <title>Plyvlist | Web Audio Component</title>
-    <meta
-            name="description"
-            content="I made a script to let me plug albums or playlists into javascript and have the browser figure it all out."
-    />
+    <script type="module">
+        import "./src/plvylist-component.js"
+    </script>
     <style>
-        html {
-            color-scheme: light dark;
-            font-family: system-ui, sans-serif;
-        }
-
-        header {
-            text-align: center;
-        }
+        html {color-scheme: light dark; font-family: system-ui, sans-serif;}
+        header {text-align: center;}
     </style>
-    <script src="src/plvylist-component.min.js" defer></script>
 </head>
-
 <body>
 <main>
     <header>
         <h1>Plvylist Demo Page</h1>
-        <p>You'll be listening to an album I wrote, <a href="https://justtroy.bandcamp.com">Alone in a Crowded Room</a>.
-        </p>
-        <p>If you want to customize the width, put it in a container.</p>
+        <p>You'll be listening to an album I wrote, <a href="https://justtroy.bandcamp.com">Alone in a Crowded Room</a>. If you want to customize the width, put it in a container.</p>
     </header>
-    <plvylist-player
-            tracks="src/tracks.json"
-            starting-volume="0.7"
-    >
-    </plvylist-player>
+    <plvylist-player tracks="src/tracks.json" starting-volume="0.7"></plvylist-player>
 </main>
 </body>
 </html>
