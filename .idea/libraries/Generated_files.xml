@@ -3,11 +3,13 @@
     <properties>
       <sourceFilesUrls>
         <item url="file://$PROJECT_DIR$/dist/v3/plvylist-component.min.js" />
+        <item url="file://$PROJECT_DIR$/docs/plvylist-component.min.js" />
         <item url="file://$PROJECT_DIR$/src/plvylist-component.min.js" />
       </sourceFilesUrls>
     </properties>
     <CLASSES>
       <root url="file://$PROJECT_DIR$/dist/v3/plvylist-component.min.js" />
+      <root url="file://$PROJECT_DIR$/docs/plvylist-component.min.js" />
       <root url="file://$PROJECT_DIR$/src/plvylist-component.min.js" />
     </CLASSES>
     <JAVADOC />
