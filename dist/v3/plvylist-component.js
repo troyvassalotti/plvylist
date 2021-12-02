@@ -1,4 +1,4 @@
-class Plvylist extends HTMLElement {
+export class Plvylist extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });

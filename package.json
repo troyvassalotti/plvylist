@@ -1,0 +1,24 @@
+{
+  "name": "plvylist",
+  "version": "1.0.0",
+  "description": "A web component for playing an album or multiple tracks in your site or app.",
+  "main": "dist/v3/plvylist-component.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/troyvassalotti/plvylist.git"
+  },
+  "keywords": [
+    "web component",
+    "music",
+    "audio"
+  ],
+  "author": "Troy Vassalotti",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/troyvassalotti/plvylist/issues"
+  },
+  "homepage": "https://github.com/troyvassalotti/plvylist#readme"
+}
