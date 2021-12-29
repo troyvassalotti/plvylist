@@ -2,10 +2,7 @@
   "name": "plvylist",
   "version": "1.0.2",
   "description": "A web component for playing an album or multiple tracks in your site or app.",
-  "main": "dist/v3/plvylist-component.js",
-  "directories": {
-    "doc": "docs"
-  },
+  "main": "plvylist-component.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/troyvassalotti/plvylist.git"
