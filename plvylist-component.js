@@ -46,7 +46,7 @@ export class Plvylist extends HTMLElement {
       }
       
       .plvylist {
-        accent-color: var(--plvylist-accent, LinkText);
+        accent-color: var(--plvylist-accent, royalblue);
         font-family: var(--plvylist-font, inherit);
         line-height: var(--plvlist-line-height, 1.5);
         margin-inline: auto;
@@ -115,7 +115,8 @@ export class Plvylist extends HTMLElement {
       
       .song__active button,
       .song__title:hover {
-        color: var(--plvylist-accent, LinkText);
+        opacity: .666;
+        text-decoration: underline;
       }
       
       input[type=range] {
