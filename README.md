@@ -6,7 +6,7 @@ A simple media player web component.
 
 Get Plvylist from one of the following ways:
 
-- Download `plvylist-component.js` from this repo (you can use the minified version if you want to).
+- Download `plvylist-player.js` from this repo (you can use the minified version if you want to).
 - Install through npm: `npm i plvylist`.
 - Import from Skypack: `<script src="https://cdn.skypack.dev/plvylist"></script>`.
 

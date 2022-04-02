@@ -1,5 +1,4 @@
 node_modules
-package.lock
-package-lock.json
-README.md
+*.json
+*.md
 **/*.min.js

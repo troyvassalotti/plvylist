@@ -13,7 +13,7 @@ import rename from "gulp-rename";
  */
 export function js() {
     return gulp
-        .src("plvylist-component.js")
+        .src("plvylist-player.js")
         .pipe(terser())
         .pipe(
             rename({
