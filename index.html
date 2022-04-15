@@ -1,41 +1,37 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Plyvlist | Web Audio Component</title>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Plyvlist | Web Audio Component</title>
+    <script type="module" src="/src/plvylist-player.js"></script>
+    <style>
+      html {
+        color-scheme: light dark;
+        font-family: system-ui, sans-serif;
+      }
 
-        <script type="module">
-            import "./plvylist-player.js";
-        </script>
+      body {
+        inline-size: 90%;
+        margin-inline: auto;
+        max-inline-size: 850px;
+      }
 
-        <style>
-            html {
-                color-scheme: light dark;
-                font-family: system-ui, sans-serif;
-            }
-
-            body {
-                inline-size: 90%;
-                margin-inline: auto;
-                max-inline-size: 850px;
-            }
-
-            header {
-                text-align: center;
-            }
-        </style>
-    </head>
-    <body>
-        <main>
-            <header>
-                <h1>Plvylist Demo Page</h1>
-                <p>
-                    You'll be listening to an album I wrote,
-                    <a href="https://justtroy.bandcamp.com">Alone in a Crowded Room</a>.
-                </p>
-            </header>
-            <plvylist-player tracks="./tracks.json" starting-volume="0.7"></plvylist-player>
-        </main>
-    </body>
+      header {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>Plvylist Demo Page</h1>
+        <p>
+          You'll be listening to an album I wrote,
+          <a href="https://justtroy.bandcamp.com">Alone in a Crowded Room</a>.
+        </p>
+      </header>
+      <plvylist-player tracks="/tracks.json" volume="0.7"></plvylist-player>
+    </main>
+  </body>
 </html>

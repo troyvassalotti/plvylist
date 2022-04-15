@@ -1,4 +1,4 @@
 node_modules
 *.json
 *.md
-**/*.min.js
+dist
