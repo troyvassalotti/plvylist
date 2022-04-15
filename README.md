@@ -6,9 +6,8 @@ A simple media player web component.
 
 Get Plvylist from one of the following ways:
 
-- Download `plvylist-player.js` from this repo (you can use the minified version if you want to).
 - Install through npm: `npm i plvylist`.
-- Import from Skypack: `<script src="https://cdn.skypack.dev/plvylist"></script>`.
+- Import from something like Skypack: `<script src="https://cdn.skypack.dev/plvylist"></script>`.
 
 Import (if installed with npm) or add the script (if installed manually) to your page, then place the element `<plvylist-player></plvylist-player>` wherever you want it.
 
@@ -43,10 +42,8 @@ All the CSS and HTML are built into the component and intended to inherit whatev
 --plvylist-changed: <color>;
 --plvylist-contrast: <color>;
 --plvylist-line-height: <number>;
---plvylist-font: <valid font property>;
+--plvylist-font: <font-family>;
 ```
-
-You can edit the `svg` icons or other styles directly within the component file if you wish, but you're on your own if you want to do that sort of thing, and updating the package may revert your changes.
 
 ## Notes
 
