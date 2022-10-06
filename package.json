@@ -20,7 +20,7 @@
     "audio"
   ],
   "scripts": {
-    "dev": "vite",
+    "start": "vite",
     "build": "npm run prettier::format && vite build",
     "prettier::lint": "prettier --check .",
     "prettier::format": "prettier --write ."
@@ -33,6 +33,9 @@
   "homepage": "https://github.com/troyvassalotti/plvylist#readme",
   "devDependencies": {
     "prettier": "^2.5.1",
-    "vite": "^2.9.5"
+    "vite": "^3.1.4"
+  },
+  "dependencies": {
+    "lit": "^2.4.0"
   }
 }
