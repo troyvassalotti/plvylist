@@ -12,11 +12,15 @@ export class Plvylist extends LitElement {
     tracks: { type: String },
     startingVolume: { type: Number, attribute: "starting-volume" },
     startingTime: { type: Number, attribute: "starting-time" },
+    audioOverride: { type: Boolean, state: true },
+    currentTrack: { type: Object, state: true },
   };
 
   constructor() {
     super();
     this.placeholder = placeholderArtwork;
+    this.audioOverride = false;
+    this.currentTrack = undefined;
 
     // Wrapped in backticks to allow single and double quotes in the string
     this.icons = [
