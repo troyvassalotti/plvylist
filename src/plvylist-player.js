@@ -1,7 +1,13 @@
+/**
+ * @TODO turn the buttons into components, in particular the play/pause button so it knows state of play vs. pause for icon
+ */
 import { LitElement, html } from "lit";
 import { map } from "lit/directives/map.js";
 import placeholderArtwork from "./placeholder-artwork.svg";
-import styles from "./plvylist-player.css?inline";
+import { styles } from "./plvylist-player.styles";
+import "./subcomponents/button/plvy-button";
+
+const EMPTY_METADATA = "--";
 
 export class Plvylist extends LitElement {
   static styles = styles;
@@ -9,58 +15,23 @@ export class Plvylist extends LitElement {
   static properties = {
     icons: { type: Object },
     placeholder: { type: String },
-    tracks: { type: String },
+    file: { type: String },
     startingVolume: { type: Number, attribute: "starting-volume" },
     startingTime: { type: Number, attribute: "starting-time" },
     audioOverride: { type: Boolean, state: true },
-    currentTrack: { type: Object, state: true },
+    currentTrack: { type: Number, state: true },
+    tracks: { type: Array, state: true },
   };
 
   constructor() {
     super();
     this.placeholder = placeholderArtwork;
+    this.file = "";
+    this.tracks = [];
     this.audioOverride = false;
     this.currentTrack = undefined;
-
-    // Wrapped in backticks to allow single and double quotes in the string
-    this.icons = [
-      {
-        name: "play",
-        icon: `<title>Play</title><path d="M7 4v16l13 -8z"/>`,
-      },
-      {
-        name: "pause",
-        icon: `<title>Pause</title><path stroke="none" d="M0 0h24v24H0z" fill="none"/><rect x="6" y="5" width="4" height="14" rx="1" /><rect x="14" y="5" width="4" height="14" rx="1" />`,
-      },
-      {
-        name: "previous",
-        icon: `<title>Previous</title><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M21 5v14l-8 -7z"></path><path d="M10 5v14l-8 -7z"></path>`,
-      },
-      {
-        name: "next",
-        icon: `<title>Next</title><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M3 5v14l8-7z"></path><path d="M14 5v14l8-7z"></path>`,
-      },
-      {
-        name: "shuffle",
-        icon: `<title>Shuffle</title><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><rect x="3" y="3" width="6" height="6" rx="1"></rect><rect x="15" y="15" width="6" height="6" rx="1"></rect><path d="M21 11v-3a2 2 0 0 0 -2 -2h-6l3 3m0 -6l-3 3"></path><path d="M3 13v3a2 2 0 0 0 2 2h6l-3 -3m0 6l3 -3"></path>`,
-      },
-      {
-        name: "loop",
-        icon: `<title>Loop</title><path stroke="none" d="M0 0h24v24H0z" fill="none"></path><path d="M4 12v-3a3 3 0 0 1 3 -3h13m-3 -3l3 3l-3 3"></path><path d="M20 12v3a3 3 0 0 1 -3 3h-13m3 3l-3-3l3-3"></path><path d="M11 11l1 -1v4"></path>`,
-      },
-      {
-        name: "volumeOff",
-        icon: `<title>Volume</title><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5" /><path d="M16 10l4 4m0 -4l-4 4" />`,
-      },
-      {
-        name: "volumeLow",
-        icon: `<title>Volume</title><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 8a5 5 0 0 1 0 8" /><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5" />`,
-      },
-      {
-        name: "volumeMid",
-        icon: `<title>Volume</title><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M15 8a5 5 0 0 1 0 8" /><path d="M17.7 5a9 9 0 0 1 0 14" /><path d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5" />`,
-      },
-    ];
+    this.startingVolume = 0.5;
+    this.startingTime = 0;
   }
 
   _query(queryString) {
@@ -98,26 +69,96 @@ export class Plvylist extends LitElement {
     return this._query("#audio");
   }
 
+  get isPlaying() {
+    return !this.audioElement.paused;
+  }
+
   get albumArtwork() {
     return this._query("#artwork");
   }
 
+  get trackSeeker() {
+    return this._query("#track-seeker");
+  }
+
+  get volumeSlider() {
+    return this._query("#volume-slider");
+  }
+
+  get currentTrackArtist() {
+    return this.tracks[this.currentTrack].artist || EMPTY_METADATA;
+  }
+
+  get currentTrackTitle() {
+    return this.tracks[this.currentTrack].title || EMPTY_METADATA;
+  }
+
+  get currentTrackAlbum() {
+    return this.tracks[this.currentTrack].album || EMPTY_METADATA;
+  }
+
+  get currentTrackArtwork() {
+    return this.tracks[this.currentTrack].artwork || this.placeholderArtwork;
+  }
+
+  get volumeLevel() {
+    if (this.audioElement.muted) {
+      return 0;
+    } else {
+      return this.audioElement.volume;
+    }
+  }
+
+  async _fetchFileData(location) {
+    const res = await fetch(location);
+    const data = await res.json();
+
+    return data;
+  }
+
+  _loadTrack(index) {
+    this.trackSeeker.value = 0;
+    this.audioElement.currentTime = 0;
+
+    this.audioElement.src = this.tracks[index].file;
+    this.currentTrack = index;
+
+    this.loadCurrentTime();
+  }
+
+  _handleSongClick(index) {
+    if (!this.currentTrack) {
+      this._loadTrack(index);
+      this._pressPlay();
+    } else if (!this.isPlaying) {
+      this._loadTrack(index);
+    } else {
+      this._loadTrack(index);
+      this.audioElement.play();
+    }
+  }
+
+  _pressPlay() {
+    this.audioElement.pause();
+    this.audioOverride = !this.audioOverride;
+  }
+
   render() {
     return html`
-      <audio id="audio"></audio>
+      <audio id="audio" .volume=${this.startingVolume} .currentTime=${this.startingTime}></audio>
       <section class="metadata">
         <img
-          src="${this.placeholder}"
-          alt="album artwork"
+          src=${this.currentTrackArtwork}
+          alt=${this.currentTrackAlbum}
           id="artwork"
           width="300"
           height="300"
           loading="lazy"
           decoding="async" />
         <div class="track-info">
-          <p class="artist">--</p>
-          <p class="track">--</p>
-          <p class="album">--</p>
+          <p class="artist">${this.currentTrackArtist}</p>
+          <p class="track">${this.currentTrackName}</p>
+          <p class="album">${this.currentTrackAlbum}</p>
           <p class="timer">
             <span class="currentTime">--</span> / <span class="duration">--</span>
           </p>
@@ -130,11 +171,20 @@ export class Plvylist extends LitElement {
           min="0"
           step="0.01"
           value="0"
+          .value=${this.startingTime}
           aria-label="Seek through the track" />
       </section>
       <section class="controls">
         <div class="controls__primary">
-          ${map(this.icons, (icon) => this._renderIcon(icon.name, icon.icon))}
+          <plvy-button type="previous" @click=${this._loadPreviousTrack}></plvy-button>
+          <plvy-button
+            type="action"
+            size="large"
+            ?playing=${this.isPlaying}
+            @click=${this._handleActionButton}></plvy-button>
+          <plvy-button type="next" @click=${this._loadNextTrack}></plvy-button>
+          <plvy-button type="shuffle" @click=${this._shuffleTracks}></plvy-button>
+          <plvy-button type="loop" @click=${this._toggleLoop}></plvy-button>
         </div>
         <div class="controls__secondary">
           <div class="volume">
@@ -144,12 +194,25 @@ export class Plvylist extends LitElement {
               min="0"
               step="0.01"
               max="1"
+              .value=${this.startingVolume}
               aria-label="Volume control" />
+            <plvy-button type="volume" .value=${this.volumeLevel}></plvy-button>
           </div>
         </div>
       </section>
       <section class="tracklist">
-        <ol id="songs"></ol>
+        <ol id="songs">
+          ${map(
+            this.tracks,
+            (track, index) => html`
+              <li class="song" data-track=${index} data-file=${track.file}>
+                <button class="song__title" @click=${this._handleSongClick(track, index)}>
+                  ${track.title}
+                </button>
+              </li>
+            `
+          )}
+        </ol>
       </section>
     `;
   }
