@@ -145,7 +145,16 @@ export class Plvylist extends LitElement {
 
   render() {
     return html`
-      <audio id="audio" .volume=${this.startingVolume} .currentTime=${this.startingTime}></audio>
+      <audio
+        id="audio"
+        .volume=${this.startingVolume}
+        .currentTime=${this.startingTime}
+        @loadstart
+        @loadmetadata
+        @volumechange
+        @ended
+        @timeupdate
+        @emptied></audio>
       <section class="metadata">
         <img
           src=${this.currentTrackArtwork}
@@ -172,7 +181,9 @@ export class Plvylist extends LitElement {
           step="0.01"
           value="0"
           .value=${this.startingTime}
-          aria-label="Seek through the track" />
+          aria-label="Seek through the track"
+          @change
+          @input />
       </section>
       <section class="controls">
         <div class="controls__primary">
@@ -183,7 +194,7 @@ export class Plvylist extends LitElement {
             ?playing=${this.isPlaying}
             @click=${this._handleActionButton}></plvy-button>
           <plvy-button type="next" @click=${this._loadNextTrack}></plvy-button>
-          <plvy-button type="shuffle" @click=${this._shuffleTracks}></plvy-button>
+          <plvy-button type="shuffle" @click=${this._handleShuffle}></plvy-button>
           <plvy-button type="loop" @click=${this._toggleLoop}></plvy-button>
         </div>
         <div class="controls__secondary">
@@ -195,8 +206,12 @@ export class Plvylist extends LitElement {
               step="0.01"
               max="1"
               .value=${this.startingVolume}
-              aria-label="Volume control" />
-            <plvy-button type="volume" .value=${this.volumeLevel}></plvy-button>
+              aria-label="Volume control"
+              @input />
+            <plvy-button
+              type="volume"
+              .value=${this.volumeLevel}
+              @click=${this._toggleVolume}></plvy-button>
           </div>
         </div>
       </section>

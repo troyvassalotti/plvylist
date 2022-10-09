@@ -85,4 +85,8 @@ export const styles = css`
   img[src^="data:image/svg+xml"] {
     filter: contrast(0.5);
   }
+
+  input[type="range"] {
+    inline-size: 100%;
+  }
 `;
