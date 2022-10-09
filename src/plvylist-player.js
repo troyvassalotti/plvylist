@@ -1,6 +1,3 @@
-/**
- * @TODO turn the buttons into components, in particular the play/pause button so it knows state of play vs. pause for icon
- */
 import { LitElement, html } from "lit";
 import { map } from "lit/directives/map.js";
 import placeholderArtwork from "./placeholder-artwork.svg";
@@ -38,33 +35,6 @@ export class Plvylist extends LitElement {
     return this?.renderRoot.querySelector(queryString);
   }
 
-  /**
-   * Creates a button element with the chosen SVG icon
-   * @param id
-   * @param icon
-   * @param type
-   * @returns {HTMLButtonElement}
-   */
-  _renderIcon(id, icon, type = "") {
-    const size = type === "large" ? "34" : "24";
-
-    return html`
-      <button id=${id}>
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          fill="none"
-          width=${size}
-          height=${size}>
-          ${icon}
-        </svg>
-      </button>
-    `;
-  }
-
   get audioElement() {
     return this._query("#audio");
   }
@@ -85,6 +55,10 @@ export class Plvylist extends LitElement {
     return this._query("#volume-slider");
   }
 
+  get trackCount() {
+    return this.tracks.length;
+  }
+
   get currentTrackArtist() {
     return this.tracks[this.currentTrack].artist || EMPTY_METADATA;
   }
@@ -101,6 +75,18 @@ export class Plvylist extends LitElement {
     return this.tracks[this.currentTrack].artwork || this.placeholderArtwork;
   }
 
+  get previousTrack() {
+    if (this.currentTrack) {
+      return this.currentTrack - 1;
+    }
+  }
+
+  get nextTrack() {
+    if (this.currentTrack) {
+      return this.currentTrack + 1;
+    }
+  }
+
   get volumeLevel() {
     if (this.audioElement.muted) {
       return 0;
@@ -109,14 +95,16 @@ export class Plvylist extends LitElement {
     }
   }
 
-  async _fetchFileData(location) {
+  async fetchFileData(location) {
     const res = await fetch(location);
     const data = await res.json();
+
+    this.tracks = data.tracks;
 
     return data;
   }
 
-  _loadTrack(index) {
+  loadTrack(index) {
     this.trackSeeker.value = 0;
     this.audioElement.currentTime = 0;
 
@@ -126,21 +114,76 @@ export class Plvylist extends LitElement {
     this.loadCurrentTime();
   }
 
-  _handleSongClick(index) {
+  handleSongClick(index) {
     if (!this.currentTrack) {
-      this._loadTrack(index);
-      this._pressPlay();
+      this.loadTrack(index);
+      this.pressPlay();
     } else if (!this.isPlaying) {
-      this._loadTrack(index);
+      this.loadTrack(index);
     } else {
-      this._loadTrack(index);
+      this.loadTrack(index);
       this.audioElement.play();
     }
   }
 
-  _pressPlay() {
-    this.audioElement.pause();
+  audioOverride() {
     this.audioOverride = !this.audioOverride;
+  }
+
+  pressPlay() {
+    this.audioElement.play();
+    this.audioOverride();
+  }
+
+  pressPause() {
+    this.audioElement.pause();
+    this.audioOverride();
+  }
+
+  loadPreviousTrack() {
+    if (!this.currentTrack) {
+      return false;
+    }
+
+    if (this.previousTrack > -1) {
+      if (this.isPlaying) {
+        this.loadTrack(this.previousTrack);
+        this.audioElement.play();
+      } else {
+        this.loadTrack(this.previousTrack);
+      }
+
+      return true;
+    } else {
+      this.pressPause();
+      this.loadTrack(this.currentTrack);
+      this.audioOverride = false;
+
+      return true;
+    }
+  }
+
+  loadNextTrack() {
+    if (!this.currentTrack) {
+      return this.loadTrack(0);
+    }
+
+    if (this.nextTrack < this.trackCount) {
+      if (this.isPlaying) {
+        this.loadTrack(this.nextTrack);
+        this.audioElement.play();
+      } else {
+        this.loadTrack(this.nextTrack);
+      }
+
+      return true;
+    } else {
+      this.pressPause();
+      this.loadTrack(0);
+      this.audioOverride = false;
+
+      return true;
+    }
   }
 
   render() {
@@ -187,15 +230,15 @@ export class Plvylist extends LitElement {
       </section>
       <section class="controls">
         <div class="controls__primary">
-          <plvy-button type="previous" @click=${this._loadPreviousTrack}></plvy-button>
+          <plvy-button type="previous" @click=${this.loadPreviousTrack}></plvy-button>
           <plvy-button
             type="action"
             size="large"
             ?playing=${this.isPlaying}
-            @click=${this._handleActionButton}></plvy-button>
-          <plvy-button type="next" @click=${this._loadNextTrack}></plvy-button>
-          <plvy-button type="shuffle" @click=${this._handleShuffle}></plvy-button>
-          <plvy-button type="loop" @click=${this._toggleLoop}></plvy-button>
+            @click=${this.handleActionButton}></plvy-button>
+          <plvy-button type="next" @click=${this.loadNextTrack}></plvy-button>
+          <plvy-button type="shuffle" @click=${this.handleShuffle}></plvy-button>
+          <plvy-button type="loop" @click=${this.toggleLoop}></plvy-button>
         </div>
         <div class="controls__secondary">
           <div class="volume">
@@ -211,7 +254,7 @@ export class Plvylist extends LitElement {
             <plvy-button
               type="volume"
               .value=${this.volumeLevel}
-              @click=${this._toggleVolume}></plvy-button>
+              @click=${this.toggleVolume}></plvy-button>
           </div>
         </div>
       </section>
@@ -221,7 +264,7 @@ export class Plvylist extends LitElement {
             this.tracks,
             (track, index) => html`
               <li class="song" data-track=${index} data-file=${track.file}>
-                <button class="song__title" @click=${this._handleSongClick(track, index)}>
+                <button class="song__title" @click=${this.handleSongClick(track, index)}>
                   ${track.title}
                 </button>
               </li>
