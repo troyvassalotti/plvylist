@@ -14,7 +14,6 @@ export class Plvylist extends LitElement {
     placeholder: { type: String },
     file: { type: String },
     startingVolume: { type: Number, attribute: "starting-volume" },
-    startingTime: { type: Number, attribute: "starting-time" },
     audioOverride: { type: Boolean, state: true },
     currentTrack: { type: Number, state: true },
     tracks: { type: Array, state: true },
@@ -28,11 +27,21 @@ export class Plvylist extends LitElement {
     this.audioOverride = false;
     this.currentTrack = undefined;
     this.startingVolume = 0.5;
-    this.startingTime = 0;
   }
 
   _query(queryString) {
     return this?.renderRoot.querySelector(queryString);
+  }
+
+  _paddedTimeStrings(time) {
+    const minutes = Math.floor(time / 60)
+      .toString()
+      .padStart(2, "0");
+    const seconds = Math.floor(time % 60)
+      .toString()
+      .padStart(2, "0");
+
+    return `${minutes}:${seconds}`;
   }
 
   get audioElement() {
@@ -40,7 +49,15 @@ export class Plvylist extends LitElement {
   }
 
   get isPlaying() {
-    return !this.audioElement.paused;
+    return !this.audioElement?.paused;
+  }
+
+  get isMuted() {
+    return this.audioElement?.muted;
+  }
+
+  get isLooping() {
+    return this.audioElement?.loop;
   }
 
   get albumArtwork() {
@@ -56,23 +73,47 @@ export class Plvylist extends LitElement {
   }
 
   get trackCount() {
-    return this.tracks.length;
+    return this.tracks?.length;
   }
 
   get currentTrackArtist() {
-    return this.tracks[this.currentTrack].artist || EMPTY_METADATA;
+    return this.tracks[this.currentTrack]?.artist || EMPTY_METADATA;
   }
 
   get currentTrackTitle() {
-    return this.tracks[this.currentTrack].title || EMPTY_METADATA;
+    return this.tracks[this.currentTrack]?.title || EMPTY_METADATA;
   }
 
   get currentTrackAlbum() {
-    return this.tracks[this.currentTrack].album || EMPTY_METADATA;
+    return this.tracks[this.currentTrack]?.album || EMPTY_METADATA;
   }
 
   get currentTrackArtwork() {
-    return this.tracks[this.currentTrack].artwork || this.placeholderArtwork;
+    return this.tracks[this.currentTrack]?.artwork || this.placeholderArtwork;
+  }
+
+  get currentTrackDuration() {
+    if (!this.audioElement?.duration) {
+      return false;
+    }
+
+    return this._paddedTimeStrings(this.audioElement?.duration);
+  }
+
+  get currentTrackTime() {
+    if (!this.audioElement?.currentTime) {
+      return false;
+    }
+
+    return this._paddedTimeStrings(this.audioElement?.currentTime);
+  }
+
+  get currentTrackSeekerValue() {
+    if (this.audioElement?.currentTime && this.audioElement?.duration) {
+      return `${parseInt((this.audioElement?.currentTime / this.audioElement?.duration) * 100, 10)}`;
+    } else {
+      return 0;
+    }
   }
 
   get previousTrack() {
@@ -88,10 +129,10 @@ export class Plvylist extends LitElement {
   }
 
   get volumeLevel() {
-    if (this.audioElement.muted) {
+    if (this.isMuted) {
       return 0;
     } else {
-      return this.audioElement.volume;
+      return this.audioElement?.volume;
     }
   }
 
@@ -106,9 +147,9 @@ export class Plvylist extends LitElement {
 
   loadTrack(index) {
     this.trackSeeker.value = 0;
-    this.audioElement.currentTime = 0;
+    this.audioElement?.currentTime = 0;
 
-    this.audioElement.src = this.tracks[index].file;
+    this.audioElement?.src = this.tracks[index].file;
     this.currentTrack = index;
 
     this.loadCurrentTime();
@@ -122,7 +163,7 @@ export class Plvylist extends LitElement {
       this.loadTrack(index);
     } else {
       this.loadTrack(index);
-      this.audioElement.play();
+      this.audioElement?.play();
     }
   }
 
@@ -131,12 +172,12 @@ export class Plvylist extends LitElement {
   }
 
   pressPlay() {
-    this.audioElement.play();
+    this.audioElement?.play();
     this.audioOverride();
   }
 
   pressPause() {
-    this.audioElement.pause();
+    this.audioElement?.pause();
     this.audioOverride();
   }
 
@@ -148,7 +189,7 @@ export class Plvylist extends LitElement {
     if (this.previousTrack > -1) {
       if (this.isPlaying) {
         this.loadTrack(this.previousTrack);
-        this.audioElement.play();
+        this.audioElement?.play();
       } else {
         this.loadTrack(this.previousTrack);
       }
@@ -171,7 +212,7 @@ export class Plvylist extends LitElement {
     if (this.nextTrack < this.trackCount) {
       if (this.isPlaying) {
         this.loadTrack(this.nextTrack);
-        this.audioElement.play();
+        this.audioElement?.play();
       } else {
         this.loadTrack(this.nextTrack);
       }
@@ -186,18 +227,105 @@ export class Plvylist extends LitElement {
     }
   }
 
+  toggleVolume() {
+    this.audioElement?.muted = !this.audioElement?.muted;
+  }
+
+  toggleLoop() {
+    this.audioElement?.loop = !this.audioElement?.loop;
+  }
+
+  shuffleTracks() {
+    let tracks = [];
+
+    for (let i = this.trackCount - 1; i > 0; i--) {
+      let j = Math.floor(Math.random() * (i + 1));
+      let tempTracks = tracks[i];
+      tracks[i] = tracks[j];
+      tracks[j] = tempTracks;
+    }
+
+    return tracks;
+  }
+
+  handleShuffle() {
+    window.alert("This will stop your current track and start you over fresh, okay?");
+
+    this.shuffleTracks();
+
+    if (this.isPlaying) {
+      this.loadTrack(0);
+      this.audioElement?.play();
+    } else {
+      this.loadTrack(0);
+    }
+  }
+
+  handleLoadStart() {
+    this.renderRoot
+      .querySelector(`[data-file="${this.tracks[this.currentTrack].file}"]`)
+      .classList.add("song__active");
+  }
+
+  handleTrackEnded() {
+    if (!this.isLooping) {
+      if (this.currentTrack === this.trackCount - 1) {
+        this.loadNextTrack();
+      } else {
+        this.loadNextTrack();
+        this.audioElement?.play();
+      }
+    }
+  }
+
+  handleTrackEmptied() {
+    this.renderRoot.querySelector(".song__active").classList.remove("song__active");
+  }
+
+  handleSeekerChange() {
+    if (!this.currentTrack) {
+      return false;
+    } else {
+      this.audioElement?.currentTime = (this.trackSeeker.value * this.audioElement?.duration) / 100;
+      this.audioOverride ? this.audioElement?.play() : false;
+    }
+  }
+
+  handleSeekerInput() {
+    if (!this.currentTrack) {
+      return false;
+    } else {
+      this.audioElement?.pause();
+    }
+  }
+
+  handleActionButton() {
+    if (!this.currentTrack) {
+      return false;
+    } else if (!this.isPlaying) {
+      this.pressPlay();
+    } else {
+      this.pressPause();
+    }
+  }
+
+  handleVolumeInput(event) {
+    this.audioElement?.volume = event.target.value;
+  }
+
+  async firstUpdated() {
+    await this.fetchFileData(this.file);
+    await this.updateComplete;
+  }
+
   render() {
     return html`
       <audio
         id="audio"
         .volume=${this.startingVolume}
-        .currentTime=${this.startingTime}
-        @loadstart
-        @loadmetadata
-        @volumechange
-        @ended
-        @timeupdate
-        @emptied></audio>
+        @loadstart=${this.handleLoadStart}
+        @ended=${this.handleTrackEnded}
+        @emptied=${this.handleTrackEmptied}></audio>
       <section class="metadata">
         <img
           src=${this.currentTrackArtwork}
@@ -212,7 +340,8 @@ export class Plvylist extends LitElement {
           <p class="track">${this.currentTrackName}</p>
           <p class="album">${this.currentTrackAlbum}</p>
           <p class="timer">
-            <span class="currentTime">--</span> / <span class="duration">--</span>
+            <span class="currentTime">${this.currentTrackTime}</span> /
+            <span class="duration">${this.trackDuration}</span>
           </p>
         </div>
       </section>
@@ -222,11 +351,10 @@ export class Plvylist extends LitElement {
           type="range"
           min="0"
           step="0.01"
-          value="0"
-          .value=${this.startingTime}
+          .value=${this.currentTrackSeekerValue}
           aria-label="Seek through the track"
-          @change
-          @input />
+          @change=${this.handleSeekerChange}
+          @input=${this.handleSeekerInput} />
       </section>
       <section class="controls">
         <div class="controls__primary">
@@ -238,7 +366,10 @@ export class Plvylist extends LitElement {
             @click=${this.handleActionButton}></plvy-button>
           <plvy-button type="next" @click=${this.loadNextTrack}></plvy-button>
           <plvy-button type="shuffle" @click=${this.handleShuffle}></plvy-button>
-          <plvy-button type="loop" @click=${this.toggleLoop}></plvy-button>
+          <plvy-button
+            type="loop"
+            @click=${this.toggleLoop}
+            ?active=${this.isLooping}></plvy-button>
         </div>
         <div class="controls__secondary">
           <div class="volume">
@@ -250,7 +381,7 @@ export class Plvylist extends LitElement {
               max="1"
               .value=${this.startingVolume}
               aria-label="Volume control"
-              @input />
+              @input=${this.handleVolumeInput} />
             <plvy-button
               type="volume"
               .value=${this.volumeLevel}
