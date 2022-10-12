@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "plvylist",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "A web component for playing an album or multiple tracks in your site or app.",
   "main": "dist/plvylist.es.js",
   "exports": {
@@ -15,7 +15,7 @@
     "url": "https://github.com/troyvassalotti/plvylist.git"
   },
   "publishConfig": {
-    "registry":"https://npm.pkg.github.com"
+    "registry": "https://npm.pkg.github.com"
   },
   "keywords": [
     "web component",
