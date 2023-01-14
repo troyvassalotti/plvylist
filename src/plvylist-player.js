@@ -1,5 +1,6 @@
 import { LitElement, html } from "lit";
 import { map } from "lit/directives/map.js";
+import { until } from "lit/directives/until.js"
 import placeholderArtwork from "./placeholder-artwork.svg";
 import { styles } from "./plvylist-player.styles";
 import "./subcomponents/button/plvy-button";
@@ -16,17 +17,27 @@ export class Plvylist extends LitElement {
     startingVolume: { type: Number, attribute: "starting-volume" },
     audioOverride: { type: Boolean, state: true },
     currentTrack: { type: Number, state: true },
-    tracks: { type: Array, state: true },
+    tracks: { state: true },
+    trackList: { state: true }
   };
 
   constructor() {
     super();
     this.placeholder = placeholderArtwork;
     this.file = "";
-    this.tracks = [];
+    this.tracks = this.fetchFileData();
+    this.trackList = this.renderTrackList();
     this.audioOverride = false;
     this.currentTrack = undefined;
     this.startingVolume = 0.5;
+  }
+
+  attributeChangedCallback(name, oldValue, newValue) {
+    super.attributeChangedCallback(name, oldValue, newValue);
+
+    if (name === "file") {
+      this.tracks = this.fetchFileData(newValue);
+    }
   }
 
   _query(queryString) {
@@ -136,20 +147,20 @@ export class Plvylist extends LitElement {
     }
   }
 
-  async fetchFileData(location) {
-    const res = await fetch(location);
+  async fetchFileData() {
+    const res = await fetch(this.file);
     const data = await res.json();
 
-    this.tracks = data.tracks;
+    console.log(data)
 
-    return data;
+    return data.tracks;
   }
 
   loadTrack(index) {
     this.trackSeeker.value = 0;
-    this.audioElement?.currentTime = 0;
+    this.audioElement.currentTime = 0;
 
-    this.audioElement?.src = this.tracks[index].file;
+    this.audioElement.src = this.tracks[index].file;
     this.currentTrack = index;
 
     this.loadCurrentTime();
@@ -228,11 +239,11 @@ export class Plvylist extends LitElement {
   }
 
   toggleVolume() {
-    this.audioElement?.muted = !this.audioElement?.muted;
+    this.audioElement.muted = !this.audioElement.muted;
   }
 
   toggleLoop() {
-    this.audioElement?.loop = !this.audioElement?.loop;
+    this.audioElement.loop = !this.audioElement.loop;
   }
 
   shuffleTracks() {
@@ -286,7 +297,7 @@ export class Plvylist extends LitElement {
     if (!this.currentTrack) {
       return false;
     } else {
-      this.audioElement?.currentTime = (this.trackSeeker.value * this.audioElement?.duration) / 100;
+      this.audioElement.currentTime = (this.trackSeeker.value * this.audioElement.duration) / 100;
       this.audioOverride ? this.audioElement?.play() : false;
     }
   }
@@ -310,12 +321,21 @@ export class Plvylist extends LitElement {
   }
 
   handleVolumeInput(event) {
-    this.audioElement?.volume = event.target.value;
+    this.audioElement.volume = event.target.value;
   }
 
-  async firstUpdated() {
-    await this.fetchFileData(this.file);
-    await this.updateComplete;
+  async renderTrackList() {
+    await this.tracks;
+
+    return map(
+            this.tracks,
+            (track, index) => html`
+              <li class="song" data-track=${index} data-file=${track.file}>
+                <button class="song__title" @click=${this.handleSongClick(track, index)}>
+                  ${track.title}
+                </button>
+              </li>`
+    )
   }
 
   render() {
@@ -391,16 +411,7 @@ export class Plvylist extends LitElement {
       </section>
       <section class="tracklist">
         <ol id="songs">
-          ${map(
-            this.tracks,
-            (track, index) => html`
-              <li class="song" data-track=${index} data-file=${track.file}>
-                <button class="song__title" @click=${this.handleSongClick(track, index)}>
-                  ${track.title}
-                </button>
-              </li>
-            `
-          )}
+       ${until(this.trackList, html`loading...`)}
         </ol>
       </section>
     `;
