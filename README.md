@@ -7,11 +7,11 @@ A simple media player web component.
 Get Plvylist from one of the following ways:
 
 - Install through npm: `npm i plvylist`.
-- Import from something like Skypack: `<script src="https://cdn.skypack.dev/plvylist"></script>`.
+- Import from something like Skypack: `<script type="module" src="https://cdn.skypack.dev/plvylist"></script>`.
 
 Import (if installed with npm) or add the script (if installed manually) to your page, then place the element `<plvylist-player></plvylist-player>` wherever you want it.
 
-The only required HTML attribute for Plvylist to work is `tracks` which accepts a path to a `.json` file describing your tracks: `tracks="location/to/files.json"`. The syntax for the file is as follows:
+The only required HTML attribute for Plvylist to work is `file` which accepts a path to a `.json` file describing your tracks: `file="location/to/files.json"`. The syntax for the file is as follows:
 
 ```json
 {
