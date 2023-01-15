@@ -1,5 +1,12 @@
 /**
  * @file Plvylist Web Component
+ * 
+ * @todo update styles to make it look better
+ * @todo only wrap meta and album at smaller screens but not 320
+ * @todo update readme
+ * @todo update to major verison bump
+ * @todo don't use the createSlider or createButton functions maybe?
+ * @todo reorder methods and properties?
  */
 
 import { html } from "common-tags";
@@ -53,12 +60,9 @@ export class Plvylist extends HTMLElement {
     this.startingTime = 0;
 
     this.audioOverride = false; // Helps manage when tracks should be started or paused during selection.
-    this.currentTrack = undefined;
+    this.currentTrackIndex = undefined;
 
-    /**
-     * Icon Storage
-     * @type {{play: string, volumeOff: string, volumeLow: string, pause: string, volumeMid: string}}
-     */
+    /** All icons. */
     this.icons = {
       play: html`<title>Play</title><path d="M7 4v16l13 -8z" />`,
       pause: html`<title>Pause</title><path stroke="none" d="M0 0h24v24H0z" fill="none" /><rect
@@ -91,16 +95,17 @@ export class Plvylist extends HTMLElement {
     };
   }
 
-  /** Component API */
+  // Component API
   static get observedAttributes() {
     return ["file", "placeholder", "starting-volume", "starting-time"];
   }
 
+  // Changes based on API
   attributeChangedCallback(name, oldValue, newValue) {
     switch (name) {
       case "file":
         this.file = newValue;
-        this.tracks = fetchTrackData(this.file);
+        this.tracks = fetchTrackData(this.file); // Initialize new tracks with the new file
         break;
       case "placeholder":
         this.placeholder = newValue;
@@ -190,20 +195,20 @@ export class Plvylist extends HTMLElement {
           box-sizing: inherit;
         }
 
-        * {
-          margin: 0;
-        }
-
         #artwork {
           block-size: auto;
           max-inline-size: 100%;
         }
 
-        .metadata {
+        .meta {
           align-items: flex-end;
           display: flex;
           flex-wrap: wrap;
           gap: 1em;
+        }
+
+        .meta p {
+          margin: 0;
         }
 
         #next {
@@ -214,11 +219,11 @@ export class Plvylist extends HTMLElement {
           stroke: var(--plvylist-changed, crimson);
         }
 
-        .seeker {
+        .seekerContainer {
           margin-block: 1rem;
         }
 
-        .volume {
+        .volumeContainer {
           display: inline-flex;
         }
 
@@ -243,20 +248,20 @@ export class Plvylist extends HTMLElement {
           opacity: 0.666;
         }
 
-        .controls__primary {
+        .controls--primary {
           display: flex;
           flex: 1;
           inline-size: 100%;
           justify-content: center;
         }
 
-        .song__title {
+        .songTitle {
           text-align: inherit;
           transition: 0.1s color ease-in-out;
         }
 
-        .song__active button,
-        .song__title:hover {
+        .song--active button,
+        .songTitle:hover {
           opacity: 0.666;
           text-decoration: underline;
         }
@@ -278,35 +283,32 @@ export class Plvylist extends HTMLElement {
    */
   renderContainer() {
     return html`
-        <audio id="plvylist"></audio>
-        <div class="meta">
-          <img
-            src="${this.placeholder}"
-            alt="album artwork"
-            id="artwork"
-            width="300"
-            height="300"
-            loading="lazy"
-            decoding="async" />
-          <div class="track-info">
-            <p class="artist">--</p>
-            <p class="track">--</p>
-            <p class="album">--</p>
-            <p class="timer">
-              <span class="currentTime">--</span> / <span class="duration">--</span>
-            </p>
-          </div>
+      <audio id="audio"></audio>
+      <div class="meta">
+        <img
+          src="${this.placeholder}"
+          alt=""
+          id="artwork"
+          width="300"
+          height="300"
+          loading="lazy"
+          decoding="async" />
+        <div class="trackInfo">
+          <p class="artist">${EMPTY_METADATA}</p>
+          <p class="track">${EMPTY_METADATA}</p>
+          <p class="album">${EMPTY_METADATA}</p>
+          <p class="timer">
+            <span class="currentTime">${EMPTY_METADATA}</span> /
+            <span class="duration">${EMPTY_METADATA}</span>
+          </p>
         </div>
-        <div class="seeker"></div>
-        <div class="controls">
-          <div class="controls__primary"></div>
-          <div class="controls__secondary">
-            <div class="volume"></div>
-          </div>
-        </div>
-        <div class="tracklist">
-          <ol id="songs"></ol>
-        </div>
+      </div>
+      <div class="seekerContainer"><!-- dynamic content --></div>
+      <div class="controls">
+        <div class="controls--primary"><!-- dynamic content --></div>
+        <div class="volumeContainer"><!-- dynamic content --></div>
+      </div>
+      <div class="tracklist"><!-- dynamic content --></div>
     `;
   }
 
@@ -348,7 +350,7 @@ export class Plvylist extends HTMLElement {
   /** Render the volume bar by creating the input and associated button and appending them to the container. */
   renderVolumeBar = () => {
     if (this.volumeContainer) {
-      const button = this.createIcon("volumeBtn", this.icons.volumeMid);
+      const button = this.createIcon("volumeButton", this.icons.volumeMid);
       const bar = this.createSlider("volume", {
         "min": "0",
         "max": "1",
@@ -381,18 +383,20 @@ export class Plvylist extends HTMLElement {
     let list = html``;
 
     this.tracks.forEach((track, index) => {
-      list += html`<li data-track="${index}" data-file="${track.file}" class="song">
-        <button class="song__title">${track.title}</button>
+      list += html`<li data-track="${index}" class="song">
+        <button class="songTitle">${track.title}</button>
       </li>`;
     });
 
-    this.songs.innerHTML = list;
+    this.songsContainer.innerHTML = html`<ol class="songs">
+      ${list}
+    </ol>`;
 
     this.trackList.forEach((track, index) =>
       track.addEventListener("click", () => {
-        if (this.currentTrack === undefined) {
+        if (this.currentTrackIsUndefined()) {
           this.loadTrack(index);
-          this.pressPlay();
+          this.playOrPause("play");
         } else if (this.audio.paused) {
           this.loadTrack(index);
         } else {
@@ -422,7 +426,7 @@ export class Plvylist extends HTMLElement {
    * @type {HTMLAudioElement}
    */
   get audio() {
-    return this.queryShadowRoot("#plvylist");
+    return this.queryShadowRoot("audio#audio");
   }
 
   /**
@@ -478,7 +482,7 @@ export class Plvylist extends HTMLElement {
    * @type {HTMLDivElement}
    */
   get seekerContainer() {
-    return this.queryShadowRoot(".seeker");
+    return this.queryShadowRoot(".seekerContainer");
   }
 
   /**
@@ -544,24 +548,24 @@ export class Plvylist extends HTMLElement {
    * @type {HTMLDivElement}
    */
   get volumeContainer() {
-    return this.queryShadowRoot(".volume");
+    return this.queryShadowRoot(".volumeContainer");
   }
 
   /**
    * Volume button.
    * @type {HTMLButtonElement}
    */
-  get volumeBtn() {
-    return this.queryShadowRoot("#volumeBtn");
+  get volumeButton() {
+    return this.queryShadowRoot("#volumeButton");
   }
 
   /**
    * Inner SVG of the volume button.
    * @type {SVGElement}
    */
-  get volumeBtnSvg() {
-    if (this.volumeBtn) {
-      return this.volumeBtn.querySelector("svg");
+  get volumeButtonSvg() {
+    if (this.volumeButton) {
+      return this.volumeButton.querySelector("svg");
     }
   }
 
@@ -577,8 +581,8 @@ export class Plvylist extends HTMLElement {
    * Container for the track list.
    * @type {HTMLOListElement}
    */
-  get songs() {
-    return this.queryShadowRoot("#songs");
+  get songsContainer() {
+    return this.queryShadowRoot(".tracklist");
   }
 
   /**
@@ -586,7 +590,71 @@ export class Plvylist extends HTMLElement {
    * @type {HTMLDivElement}
    */
   get controlsPrimaryContainer() {
-    return this.queryShadowRoot(".controls__primary");
+    return this.queryShadowRoot(".controls--primary");
+  }
+
+  /**
+   * All the individual track list items.
+   * @type {HTMLLIElement[]}
+   */
+  get trackList() {
+    return this.queryShadowRoot(".songTitle", true);
+  }
+
+  /**
+   * Alt text for the artwork image.
+   * @type {string}
+   */
+  get albumArtAltText() {
+    return this.trackAlbumArt ? `Album art for ${this.trackAlbum}` : "";
+  }
+
+  /**
+   * Current track object.
+   * @type {Record<string, string>}
+   */
+  get currentTrack() {
+    return this.tracks[this.currentTrackIndex];
+  }
+
+  /**
+   * Current artist.
+   * @type {string}
+   */
+  get trackArtist() {
+    return this.currentTrack?.artist || EMPTY_METADATA;
+  }
+
+  /**
+   * Current track title.
+   * @type {string}
+   */
+  get trackTitle() {
+    return this.currentTrack?.title || EMPTY_METADATA;
+  }
+
+  /**
+   * Current album.
+   * @type {string}
+   */
+  get trackAlbum() {
+    return this.currentTrack?.album || EMPTY_METADATA;
+  }
+
+  /**
+   * Current track's artwork.
+   * @type {string}
+   */
+  get trackAlbumArt() {
+    return this.currentTrack?.artwork;
+  }
+
+  /**
+   * Current track's file.
+   * @type {string}
+   */
+  get trackFile() {
+    return this.currentTrack.file;
   }
 
   /** Total number of tracks. */
@@ -595,12 +663,12 @@ export class Plvylist extends HTMLElement {
   }
 
   /**
-   * All the individual track list items.
-   * @type {HTMLLIElement[]}
+   * Check if the current track index is undefined.
+   * @returns {boolean} If the currentTrackIndex is undefined.
    */
-  get trackList() {
-    return this.queryShadowRoot(".song__title", true);
-  }
+  currentTrackIsUndefined = () => {
+    return this.currentTrackIndex === undefined;
+  };
 
   /** Set default or custom settings from the API. */
   applySettings = () => {
@@ -615,106 +683,113 @@ export class Plvylist extends HTMLElement {
    * @param {number} index Valid index as number for the tracks array.
    */
   loadTrack = (index) => {
+    this.currentTrackIndex = index;
+
+    // Reset inputs
     this.seeker.value = 0;
     this.audio.currentTime = 0;
-    this.audio.src = this.tracks[index].file;
-    this.currentTrack = index;
 
-    this.artist.innerHTML = this.tracks[index].artist || EMPTY_METADATA;
-    this.track.innerHTML = this.tracks[index].title || EMPTY_METADATA;
-    this.album.innerHTML = this.tracks[index].album || EMPTY_METADATA;
-
-    this.artwork.setAttribute("src", this.tracks[index].artwork || placeholderImage);
+    // Reset metadata
+    this.audio.src = this.trackFile;
+    this.artist.innerHTML = this.trackArtist;
+    this.track.innerHTML = this.trackTitle;
+    this.album.innerHTML = this.trackAlbum;
+    this.artwork.src = this.trackAlbumArt || this.placeholder;
 
     this.loadCurrentTime();
   };
 
-  /** Pauses a track and sets the associated HTML and class properties. */
-  pressPause = () => {
-    this.audio.pause();
-    this.actionSvg.innerHTML = this.icons.play;
-    this.audioOverride = !this.audioOverride;
-  };
+  /** Play or pause a track and set respective properties. */
+  playOrPause = (type = "play") => {
+    if (type === "play") {
+      this.audio.play();
+      this.actionSvg.innerHTML = this.icons.pause;
+    }
 
-  /** Plays a track and sets the associated HTML and class properties. */
-  pressPlay = () => {
-    this.audio.play();
-    this.actionSvg.innerHTML = this.icons.pause;
+    if (type === "pause") {
+      this.audio.pause();
+      this.actionSvg.innerHTML = this.icons.play;
+    }
+
     this.audioOverride = !this.audioOverride;
   };
 
   /** Changes selection to the previous track. */
   previousTrack = () => {
-    if (this.currentTrack === undefined) {
+    const track = this.currentTrackIndex - 1;
+    if (this.currentTrackIsUndefined()) {
       return false;
-    } else if (this.currentTrack - 1 > -1) {
+    } else if (track > -1) {
       if (!this.audio.paused) {
-        this.loadTrack(this.currentTrack - 1);
+        this.loadTrack(track);
         this.audio.play();
       } else {
-        this.loadTrack(this.currentTrack - 1);
+        this.loadTrack(track);
       }
     } else {
-      this.pressPause();
-      this.loadTrack(this.currentTrack);
+      this.playOrPause("pause");
+      this.loadTrack(this.currentTrackIndex);
       this.audioOverride = false;
     }
   };
 
   /** Changes selection to the next track. */
   nextTrack = () => {
-    if (this.currentTrack === undefined) {
+    const track = this.currentTrackIndex + 1;
+    if (this.currentTrackIsUndefined()) {
       this.loadTrack(0);
-    } else if (this.currentTrack + 1 < this.trackCount) {
+    } else if (track < this.trackCount) {
       if (!this.audio.paused) {
-        this.loadTrack(this.currentTrack + 1);
+        this.loadTrack(track);
         this.audio.play();
       } else {
-        this.loadTrack(this.currentTrack + 1);
+        this.loadTrack(track);
       }
     } else {
-      this.pressPause();
+      this.playOrPause("pause");
       this.loadTrack(0);
       this.audioOverride = false;
     }
   };
 
+  /**
+   * Turn a number into a string with minutes and seconds.
+   * @param {number} time Number to turn into a time string.
+   * @returns {string} minutes:seconds
+   */
+  timeToString = (time = this.audio.currentTime) => {
+    const minutes = Math.floor(time / 60)
+      .toString()
+      .padStart(2, "0");
+    const seconds = Math.floor(time % 60)
+      .toString()
+      .padStart(2, "0");
+
+    return `${minutes}:${seconds}`;
+  };
+
   /** Loads the current track's duration from metadata and displays it. */
   loadDuration = () => {
-    let time = this.audio.duration;
-
-    let minutes = Math.floor(time / 60);
-    minutes < 10 ? (minutes = `0${minutes}`) : minutes;
-
-    let seconds = Math.floor(time % 60);
-    seconds < 10 ? (seconds = `0${seconds}`) : seconds;
-
-    this.duration.innerHTML = `${minutes}:${seconds}`;
+    this.duration.innerHTML = this.timeToString(this.audio.duration);
   };
 
   /** Loads the current track's play progress from metadata and displays it. */
   loadCurrentTime = (time = this.audio.currentTime) => {
     if (!this.audio.src) {
-      return false;
+      return false; // Don't do anything if there's no audio source
     }
 
-    let minutes = Math.floor(time / 60);
-    minutes < 10 ? (minutes = `0${minutes}`) : minutes;
-
-    let seconds = Math.floor(time % 60);
-    seconds < 10 ? (seconds = `0${seconds}`) : seconds;
-
-    this.current.innerHTML = `${minutes}:${seconds}`;
+    this.current.innerHTML = this.timeToString();
   };
 
   /** Changes the icon in the volume button based on the current volume level. */
   setVolumeIcon = () => {
     if (this.audio.volume === 0 || this.audio.muted) {
-      this.volumeBtnSvg.innerHTML = this.icons.volumeOff;
+      this.volumeButtonSvg.innerHTML = this.icons.volumeOff;
     } else if (this.audio.volume <= 0.45) {
-      this.volumeBtnSvg.innerHTML = this.icons.volumeLow;
+      this.volumeButtonSvg.innerHTML = this.icons.volumeLow;
     } else {
-      this.volumeBtnSvg.innerHTML = this.icons.volumeMid;
+      this.volumeButtonSvg.innerHTML = this.icons.volumeMid;
     }
   };
 
@@ -722,7 +797,7 @@ export class Plvylist extends HTMLElement {
   toggleVolume = () => {
     if (!this.audio.muted) {
       this.audio.muted = !this.audio.muted;
-      this.volumeBtnSvg.innerHTML = this.icons.volumeOff;
+      this.volumeButtonSvg.innerHTML = this.icons.volumeOff;
       this.volume.value = 0;
     } else {
       this.audio.muted = !this.audio.muted;
@@ -742,8 +817,9 @@ export class Plvylist extends HTMLElement {
    * @returns {Array<Record<string, string>} New track list.
    */
   shuffleTracks = () => {
-    let tracks = this.tracks;
+    let tracks = this.tracks; // Original track list
 
+    // Randomize the order
     for (let i = tracks.length - 1; i > 0; i--) {
       let j = Math.floor(Math.random() * (i + 1));
       let tempTracks = tracks[i];
@@ -751,118 +827,110 @@ export class Plvylist extends HTMLElement {
       tracks[j] = tempTracks;
     }
 
-    this.tracks = tracks;
+    this.tracks = tracks; // Store new order in class property
 
     return tracks;
   };
 
+  /** Add a class to the active song. */
+  addActiveTrackClass = () => {
+    this.queryShadowRoot(`[data-track="${this.currentTrackIndex}"]`).classList.add("song--active");
+  };
+
+  /** Run on audio end. */
+  handleAudioEnded = () => {
+    if (!this.audio.loop) {
+      if (this.currentTrackIndex === this.trackCount - 1) {
+        this.nextTrack();
+      } else {
+        this.nextTrack();
+        this.audio.play();
+      }
+    }
+  };
+
+  /** Update the seeker value as the track progresses. */
+  handleTimeUpdate = () => {
+    this.seeker.value = `${parseInt((this.audio.currentTime / this.audio.duration) * 100, 10)}`;
+    this.loadCurrentTime();
+  };
+
+  /** Run on audio empty.  */
+  handleAudioEmptied = () => {
+    const activeSong = this.queryShadowRoot(".song--active");
+
+    if (activeSong) activeSong.classList.remove("song--active");
+  };
+
+  /** Run when the seeker emits change. */
+  handleSeekerChange = () => {
+    if (this.currentTrackIsUndefined()) {
+      return false;
+    } else {
+      this.audio.currentTime = (this.seeker.value * this.audio.duration) / 100;
+      this.audioOverride ? this.audio.play() : false;
+    }
+  };
+
+  /** Run when seeker emits input. */
+  handleSeekerInput = (event) => {
+    if (this.currentTrackIsUndefined()) {
+      return false;
+    } else {
+      this.audio.pause();
+      const newTime = (event.target.value * this.audio.duration) / 100;
+      this.loadCurrentTime(newTime);
+    }
+  };
+
+  /** Run when pressing the primary action button. */
+  handleActionClick = () => {
+    if (this.currentTrackIsUndefined()) {
+      this.loadTrack(0);
+      this.playOrPause("play");
+    } else if (this.audio.paused) {
+      this.playOrPause("play");
+    } else {
+      this.playOrPause("pause");
+    }
+  };
+
+  /** Run on shuffle click. */
+  handleShuffle = () => {
+    window.alert("This will stop your current track and start you over fresh, okay?");
+
+    this.renderTrackList(true);
+
+    if (!this.audio.paused) {
+      this.loadTrack(0);
+      this.audio.play();
+    } else {
+      this.loadTrack(0);
+    }
+  };
+
+  /** Run when volume bar emits input. */
+  handleVolumeInput = () => {
+    this.audio.volume = this.volume.value;
+  };
+
   /** Add event listeners to all relevant elements. */
   addAllEventListeners() {
-    /** On track loadstart, identify the active track. */
-    this.audio.addEventListener("loadstart", () => {
-      this.queryShadowRoot(`[data-file="${this.tracks[this.currentTrack].file}"]`).classList.add(
-        "song__active"
-      );
-    });
-
-    /** Load in the duration of the track when the metadata finishes loading. */
+    this.audio.addEventListener("loadstart", this.addActiveTrackClass);
     this.audio.addEventListener("loadedmetadata", this.loadDuration);
-
-    /** Listen for volume changes and adjust the icon. */
     this.audio.addEventListener("volumechange", this.setVolumeIcon);
-
-    /** When a track ends, either loop it or go to the next track. */
-    this.audio.addEventListener("ended", () => {
-      if (!this.audio.loop) {
-        if (this.currentTrack === this.trackCount - 1) {
-          this.nextTrack();
-        } else {
-          this.nextTrack();
-          this.audio.play();
-        }
-      }
-    });
-
-    /** Display progress & sets percentage. */
-    this.audio.addEventListener("timeupdate", () => {
-      this.seeker.value = `${parseInt((this.audio.currentTime / this.audio.duration) * 100, 10)}`;
-      this.loadCurrentTime();
-    });
-
-    /** When the track gets emptied, remove the active track class. */
-    this.audio.addEventListener("emptied", () => {
-      const activeSong = this.queryShadowRoot(".song__active");
-
-      if (activeSong) activeSong.classList.remove("song__active");
-    });
-
-    /** Listen for changes to the track seeker and adjust any time values. */
-    this.seeker.addEventListener("change", () => {
-      if (this.currentTrack === undefined) {
-        return false;
-      } else {
-        this.audio.currentTime = (this.seeker.value * this.audio.duration) / 100;
-        this.audioOverride ? this.audio.play() : false;
-      }
-    });
-
-    /** Listen for direct changes to the track seeker and adjust any time values. */
-    this.seeker.addEventListener("input", (event) => {
-      if (this.currentTrack === undefined) {
-        return false;
-      } else {
-        this.audio.pause();
-        let newTime = (event.target.value * this.audio.duration) / 100;
-        this.loadCurrentTime(newTime);
-      }
-    });
-
-    /** Play the previous track on click. */
+    this.audio.addEventListener("ended", this.handleAudioEnded);
+    this.audio.addEventListener("timeupdate", this.handleTimeUpdate);
+    this.audio.addEventListener("emptied", this.handleAudioEmptied);
+    this.seeker.addEventListener("change", this.handleSeekerChange);
+    this.seeker.addEventListener("input", this.handleSeekerInput);
     this.previous.addEventListener("click", this.previousTrack);
-
-    /** Control playing and pausing of media on the action button. */
-    this.action.addEventListener("click", () => {
-      if (this.currentTrack === undefined) {
-        this.loadTrack(0);
-        this.pressPlay();
-      } else if (this.audio.paused) {
-        this.pressPlay();
-      } else {
-        this.pressPause();
-      }
-    });
-
-    /** Play the next track on click. */
+    this.action.addEventListener("click", this.handleActionClick);
     this.next.addEventListener("click", this.nextTrack);
-
-    /** Loop the active track on click. */
     this.loop.addEventListener("click", this.toggleLoop);
-
-    /** Shuffle songs on click. */
-    this.shuffle.addEventListener("click", () => {
-      window.alert("This will stop your current track and start you over fresh, okay?");
-
-      this.renderTrackList(true);
-
-      if (!this.audio.paused) {
-        this.loadTrack(0);
-        this.audio.play();
-      } else {
-        this.loadTrack(0);
-      }
-    });
-
-    /** Turn volume on or off on click. */
-    this.volumeBtn.addEventListener("click", this.toggleVolume);
-
-    /** Keep the audio and volume input values in sync during input. */
-    this.volume.addEventListener(
-      "input",
-      (e) => {
-        this.audio.volume = this.volume.value;
-      },
-      false
-    );
+    this.shuffle.addEventListener("click", this.handleShuffle);
+    this.volumeButton.addEventListener("click", this.toggleVolume);
+    this.volume.addEventListener("input", this.handleVolumeInput, false);
   }
 
   connectedCallback() {
