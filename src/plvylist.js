@@ -278,7 +278,6 @@ export class Plvylist extends HTMLElement {
    */
   renderContainer() {
     return html`
-      <div class="plvylist">
         <audio id="plvylist"></audio>
         <div class="meta">
           <img
@@ -308,7 +307,6 @@ export class Plvylist extends HTMLElement {
         <div class="tracklist">
           <ol id="songs"></ol>
         </div>
-      </div>
     `;
   }
 
