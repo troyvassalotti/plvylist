@@ -47,7 +47,7 @@ const fetchTrackData = async (location) => {
  * <plvy-list file="./tracks.json" starting-volume="0.75" starting-time=".4" placeholder="./image.jpg"></plvy-list>
  * ```
  */
-export class Plvylist extends HTMLElement {
+export default class Plvylist extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: "open" });
