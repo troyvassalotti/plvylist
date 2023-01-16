@@ -1,6 +1,6 @@
 /**
  * @file Plvylist Web Component
- * 
+ *
  * @todo update styles to make it look better
  * @todo only wrap meta and album at smaller screens but not 320
  * @todo update readme
@@ -207,8 +207,13 @@ export class Plvylist extends HTMLElement {
           gap: 1em;
         }
 
-        .meta p {
+        p {
           margin: 0;
+        }
+
+        ol {
+          margin: 0;
+          padding: 0;
         }
 
         #next {
