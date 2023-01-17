@@ -38,8 +38,6 @@ const fetchTrackData = async (location) => {
  * @attribute {string} starting-time - Some number (format unsure) if you want to change the initial starting time of component. Through testing, I don't really know how this works aside from knowing it's an option I've given you.
  *
  * @cssproperty --plvylist-accent - Accent color for form elements.
- * @cssproperty --plvylist-font - Font family for component.
- * @cssproperty --plvylist-line-height - Line height for text.
  * @cssproperty --plvylist-changed - Color to use for changed button states (currently only the loop button).
  *
  * @example
@@ -185,8 +183,6 @@ export default class Plvylist extends HTMLElement {
           accent-color: var(--plvylist-accent, royalblue);
           box-sizing: border-box;
           display: block;
-          font-family: var(--plvylist-font, inherit);
-          line-height: var(--plvlist-line-height, 1.5);
         }
 
         *,
@@ -213,7 +209,6 @@ export default class Plvylist extends HTMLElement {
 
         ol {
           margin: 0;
-          padding: 0;
         }
 
         #next {
