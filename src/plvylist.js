@@ -37,8 +37,9 @@ const fetchTrackData = async (location) => {
  * @attribute {string} starting-volume - Number between 0 and 1 to set the volume at.
  * @attribute {string} starting-time - Some number (format unsure) if you want to change the initial starting time of component. Through testing, I don't really know how this works aside from knowing it's an option I've given you.
  *
- * @cssproperty --plvylist-accent - Accent color for form elements.
- * @cssproperty --plvylist-changed - Color to use for changed button states (currently only the loop button).
+ * @cssproperty --plvylist-color-accent - Accent color for form elements.
+ * @cssproperty --plvylist-color-button-border - Border color for button controls.
+ * @cssproperty --plvylist-color-active - Color to use for changed button states (currently only the loop button).
  *
  * @example
  * ```html
@@ -126,9 +127,10 @@ export default class Plvylist extends HTMLElement {
    * @param type Icon could be "large" or default size.
    * @returns {HTMLButtonElement}
    */
-  createIcon = (id, icon, type = "") => {
+  createIcon = (id, icon, type = "", classes = ["controlButton"]) => {
     const button = document.createElement("button");
     button.id = id;
+    button.classList.add(...classes);
 
     const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     svg.setAttribute("viewBox", "0 0 24 24");
@@ -179,8 +181,10 @@ export default class Plvylist extends HTMLElement {
   renderStyles() {
     return html`
       <style>
+        /* ======
+         * Resets
+         * ====== */
         :host {
-          accent-color: var(--plvylist-accent, royalblue);
           box-sizing: border-box;
           display: block;
         }
@@ -189,13 +193,38 @@ export default class Plvylist extends HTMLElement {
         *::after,
         *::before {
           box-sizing: inherit;
+          margin: 0;
+          padding: 0;
         }
 
-        #artwork {
+        img {
           block-size: auto;
+          display: block;
           max-inline-size: 100%;
         }
 
+        button {
+          background: none;
+          border: none;
+          cursor: pointer;
+          font: inherit;
+          text-align: inherit;
+        }
+
+        /* =====
+         * Theme
+         * ===== */
+        :host {
+          accent-color: var(--plvylist-color-accent, royalblue);
+        }
+
+        img[src^="data:image/svg+xml"] {
+          filter: contrast(0.5); /* Covers the placeholder image */
+        }
+
+        /* ============
+         * Meta Section
+         * ============ */
         .meta {
           align-items: flex-end;
           display: flex;
@@ -203,12 +232,12 @@ export default class Plvylist extends HTMLElement {
           gap: 1em;
         }
 
-        * {
-          margin: 0;
-        }
-
-        .button--active svg {
-          stroke: var(--plvylist-changed, crimson);
+        /* ===================
+         * Controls :: Sliders
+         * =================== */
+        input[type="range"] {
+          display: block;
+          inline-size: 100%;
         }
 
         .sliders {
@@ -223,22 +252,23 @@ export default class Plvylist extends HTMLElement {
 
         .volumeContainer {
           display: flex;
+          gap: 1ch;
         }
 
-        :is(.song, .controls) button {
-          background: none;
-          border: none;
-          color: inherit;
-          cursor: pointer;
-          font: inherit;
-          padding: 0;
+        /* ===================
+         * Controls :: Buttons
+         * =================== */
+        .controlButton {
+          border: 1px solid var(--plvylist-color-button-border, transparent);
+          border-radius: 50%;
+          padding: 0.5rem;
         }
 
         .controls {
           display: flex;
           flex-direction: column;
-          gap: 1rem;
-          margin-block: 1.5rem;
+          gap: .5rem;
+          margin-block: 1rem;
         }
 
         .controls button {
@@ -257,30 +287,39 @@ export default class Plvylist extends HTMLElement {
           justify-content: center;
         }
 
+        .button--active svg {
+          stroke: var(--plvylist-color-active, crimson);
+        }
+
         #action {
-          border-radius: 50%;
           background-color: currentColor;
           stroke: canvas;
         }
 
-        .songTitle {
-          text-align: inherit;
+        /* ==========
+         * Track List
+         * ========== */
+        .trackList__table {
+          inline-size: 100%;
+          table-layout: fixed;
+        }
+
+        .trackList__table th, td {
+          text-align: start;
+        }
+
+        .trackList__table th {
+          text-transform: uppercase;
+        }
+
+        .track__trackTitleButton {
           transition: 0.1s color ease-in-out;
         }
 
         .song--active button,
-        .songTitle:hover {
+        .track__trackTitleButton:hover {
           opacity: 0.666;
           text-decoration: underline;
-        }
-
-        img[src^="data:image/svg+xml"] {
-          filter: contrast(0.5);
-        }
-
-        input[type="range"] {
-          display: block;
-          inline-size: 100%;
         }
       </style>
     `;
@@ -394,14 +433,31 @@ export default class Plvylist extends HTMLElement {
     let list = html``;
 
     this.tracks.forEach((track, index) => {
-      list += html`<li data-track="${index}" class="song">
-        <button class="songTitle">${track.title}</button>
-      </li>`;
+      list += html`<tr>
+        <td class="track" data-track="${index}">
+          <button class="track__trackTitleButton">
+            <span class="track__trackTitle">${track.title}</span>
+          </button>
+        </td>
+        <td>
+          <span class="track__trackArtist">${track.artist}</span>
+        </td>
+        <td>
+          <span class="track__trackAlbum">${track.album}</span>
+        </td>
+      </tr>`;
     });
 
-    this.songsContainer.innerHTML = html`<ol class="songs">
-      ${list}
-    </ol>`;
+    this.songsContainer.innerHTML = html`<table class="trackList__table">
+      <thead>
+        <th>Track</th>
+        <th>Artist</th>
+        <th>Album</th>
+      </thead>
+      <tbody>
+        ${list}
+      </tbody>
+    </table>`;
 
     this.trackList.forEach((track, index) =>
       track.addEventListener("click", () => {
@@ -609,7 +665,7 @@ export default class Plvylist extends HTMLElement {
    * @type {HTMLLIElement[]}
    */
   get trackList() {
-    return this.queryShadowRoot(".songTitle", true);
+    return this.queryShadowRoot(".track__trackTitleButton", true);
   }
 
   /**
