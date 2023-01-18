@@ -139,8 +139,8 @@ export default class Plvylist extends HTMLElement {
 
     switch (type) {
       case "large":
-        svg.setAttribute("width", "34");
-        svg.setAttribute("height", "34");
+        svg.setAttribute("width", "44");
+        svg.setAttribute("height", "44");
         break;
       default:
         svg.setAttribute("width", "24");
@@ -203,28 +203,26 @@ export default class Plvylist extends HTMLElement {
           gap: 1em;
         }
 
-        p {
+        * {
           margin: 0;
         }
 
-        ol {
-          margin: 0;
-        }
-
-        #next {
-          margin-inline-end: auto;
-        }
-
-        .loop--active svg {
+        .button--active svg {
           stroke: var(--plvylist-changed, crimson);
         }
 
+        .sliders {
+          align-items: center;
+          display: flex;
+          gap: 2rem;
+        }
+
         .seekerContainer {
-          margin-block: 1rem;
+          flex: 1;
         }
 
         .volumeContainer {
-          display: inline-flex;
+          display: flex;
         }
 
         :is(.song, .controls) button {
@@ -233,26 +231,36 @@ export default class Plvylist extends HTMLElement {
           color: inherit;
           cursor: pointer;
           font: inherit;
-          stroke: currentColor;
+          padding: 0;
         }
 
         .controls {
-          align-items: center;
           display: flex;
-          flex-wrap: wrap;
-          justify-content: center;
-          margin-block: 1rem;
+          flex-direction: column;
+          gap: 1rem;
+          margin-block: 1.5rem;
+        }
+
+        .controls button {
+          display: flex;
+          stroke: currentColor;
         }
 
         .controls button:hover svg {
           opacity: 0.666;
         }
 
-        .controls--primary {
+        .buttons {
+          align-items: center;
           display: flex;
-          flex: 1;
-          inline-size: 100%;
+          gap: 2ch;
           justify-content: center;
+        }
+
+        #action {
+          border-radius: 50%;
+          background-color: currentColor;
+          stroke: canvas;
         }
 
         .songTitle {
@@ -271,6 +279,7 @@ export default class Plvylist extends HTMLElement {
         }
 
         input[type="range"] {
+          display: block;
           inline-size: 100%;
         }
       </style>
@@ -303,10 +312,12 @@ export default class Plvylist extends HTMLElement {
           </p>
         </div>
       </div>
-      <div class="seekerContainer"><!-- dynamic content --></div>
       <div class="controls">
-        <div class="controls--primary"><!-- dynamic content --></div>
-        <div class="volumeContainer"><!-- dynamic content --></div>
+        <div class="sliders">
+          <div class="seekerContainer"><!-- dynamic content --></div>
+          <div class="volumeContainer"><!-- dynamic content --></div>
+        </div>
+        <div class="buttons"><!-- dynamic content --></div>
       </div>
       <div class="tracklist"><!-- dynamic content --></div>
     `;
@@ -323,12 +334,12 @@ export default class Plvylist extends HTMLElement {
   /** Render the primary control bar by creating each button element and appending them to the container. */
   renderPrimaryControls = () => {
     if (this.controlsPrimaryContainer) {
+      this.controlsPrimaryContainer.appendChild(this.createIcon("shuffle", this.icons.shuffle));
       this.controlsPrimaryContainer.appendChild(this.createIcon("previous", this.icons.previous));
       this.controlsPrimaryContainer.appendChild(
         this.createIcon("action", this.icons.play, "large")
       );
       this.controlsPrimaryContainer.appendChild(this.createIcon("next", this.icons.next));
-      this.controlsPrimaryContainer.appendChild(this.createIcon("shuffle", this.icons.shuffle));
       this.controlsPrimaryContainer.appendChild(this.createIcon("loop", this.icons.loop));
     }
   };
@@ -590,7 +601,7 @@ export default class Plvylist extends HTMLElement {
    * @type {HTMLDivElement}
    */
   get controlsPrimaryContainer() {
-    return this.queryShadowRoot(".controls--primary");
+    return this.queryShadowRoot(".buttons");
   }
 
   /**
@@ -809,7 +820,7 @@ export default class Plvylist extends HTMLElement {
   /** Sets the track to loop or not based on loop state. */
   toggleLoop = () => {
     this.audio.loop = !this.audio.loop;
-    this.loop.classList.toggle("loop--active");
+    this.loop.classList.toggle("button--active");
   };
 
   /**
