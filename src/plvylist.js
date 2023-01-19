@@ -1,18 +1,16 @@
 /**
  * @file Plvylist Web Component
  *
- * @todo update styles to make it look better
- * @todo only wrap meta and album at smaller screens but not 320
+ * @todo update colors
  * @todo update readme
  * @todo update to major verison bump
- * @todo don't use the createSlider or createButton functions maybe?
- * @todo reorder methods and properties?
  */
 
 import { html } from "common-tags";
 import placeholderArtwork from "./placeholder-artwork.svg";
 
 const EMPTY_METADATA = "--";
+const BREAKPOINT_MEDIUM = "750px";
 
 /**
  * Fetches data from a JSON file to look for its tracks.
@@ -121,6 +119,261 @@ export default class Plvylist extends HTMLElement {
   }
 
   /**
+   * Render component styles.
+   * @returns {string} HTML string for the component styles in a `<style>` element.
+   */
+  renderStyles() {
+    return html`
+      <style>
+        /* ======
+         * Resets
+         * ====== */
+        :host {
+          box-sizing: border-box;
+          display: block;
+        }
+
+        *,
+        *::after,
+        *::before {
+          box-sizing: inherit;
+          margin: 0;
+          padding: 0;
+        }
+
+        img {
+          block-size: auto;
+          display: block;
+          max-inline-size: 100%;
+        }
+
+        button {
+          background: none;
+          border: none;
+          cursor: pointer;
+          font: inherit;
+          text-align: inherit;
+        }
+
+        /* =====
+         * Theme
+         * ===== */
+        :host {
+          /* FONT SIZE */
+          --step--2: clamp(0.78rem, calc(0.77rem + 0.07vw), 0.84rem);
+          --step--1: clamp(0.94rem, calc(0.91rem + 0.14vw), 1.05rem);
+          --step-0: clamp(1.13rem, calc(1.08rem + 0.23vw), 1.31rem);
+
+          /* SPACING */
+          --space-3xs: clamp(0.31rem, calc(0.31rem + 0vw), 0.31rem);
+          --space-2xs: clamp(0.56rem, calc(0.53rem + 0.16vw), 0.69rem);
+          --space-xs: clamp(0.88rem, calc(0.84rem + 0.16vw), 1rem);
+          --space-s: clamp(1.13rem, calc(1.08rem + 0.23vw), 1.31rem);
+          --space-m: clamp(1.69rem, calc(1.61rem + 0.39vw), 2rem);
+          --space-l: clamp(2.25rem, calc(2.16rem + 0.47vw), 2.63rem);
+
+          accent-color: var(--plvylist-color-accent, royalblue);
+        }
+
+        img[src^="data:image/svg+xml"] {
+          filter: contrast(0.5); /* Covers the placeholder image */
+        }
+
+        #artwork {
+          margin-inline: auto;
+        }
+
+        /* ============
+         * Meta Section
+         * ============ */
+        .meta {
+          align-items: end;
+          display: grid;
+          gap: var(--space-s);
+        }
+
+        @media (min-width: ${BREAKPOINT_MEDIUM}) {
+          .meta {
+            grid-template-columns: auto 1fr;
+          }
+        }
+
+        /* ================
+         * Controls Section
+         * ================ */
+        .controls {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+          margin-block: var(--space-s);
+        }
+
+        .controls button {
+          display: flex;
+          stroke: currentColor;
+        }
+
+        .controls button:hover svg {
+          opacity: 0.666;
+        }
+
+        /* ===================
+         * Controls :: Sliders
+         * =================== */
+        input[type="range"] {
+          display: block;
+          inline-size: 100%;
+        }
+
+        .sliders {
+          align-items: center;
+          display: grid;
+          gap: var(--space-s);
+        }
+
+        @media (min-width: ${BREAKPOINT_MEDIUM}) {
+          .sliders {
+            grid-template-columns: 2.5fr 1fr;
+          }
+        }
+
+        .sliders > * {
+          inline-size: 100%;
+        }
+
+        .seekerContainer {
+          flex: 1;
+        }
+
+        .volumeContainer {
+          display: flex;
+          gap: 1ch;
+        }
+
+        /* ===================
+         * Controls :: Buttons
+         * =================== */
+        .controlButton {
+          border: 1px solid var(--plvylist-color-button-border, transparent);
+          border-radius: 50%;
+          padding: 0.5rem;
+        }
+
+        .buttons {
+          align-items: center;
+          display: flex;
+          flex-wrap: wrap;
+          gap: var(--space-2xs);
+          justify-content: center;
+        }
+
+        .button--active svg {
+          stroke: var(--plvylist-color-active, crimson);
+        }
+
+        #action {
+          background-color: currentColor;
+          stroke: canvas;
+        }
+
+        /* ==========
+         * Track List
+         * ========== */
+        .tracklist {
+          overflow: auto;
+        }
+
+        .trackList__table {
+          border-collapse: collapse;
+          counter-reset: tracks;
+          font-size: var(--step--1);
+          inline-size: 100%;
+          min-inline-size: max-content;
+        }
+
+        .trackList__table :is(th, td) {
+          padding-block: var(--cell-padding, var(--space-3xs));
+          padding-inline: 1ch;
+          text-align: start;
+        }
+
+        .trackList__table thead tr {
+          border-block-end: 1px solid;
+        }
+
+        .trackList__table th {
+          --cell-padding: var(--space-2xs);
+
+          text-transform: uppercase;
+        }
+
+        .trackList__track {
+          counter-increment: tracks;
+        }
+
+        .trackList__track::before {
+          content: counter(tracks) ".";
+        }
+
+        .track__trackTitleButton {
+          transition: 0.1s color ease-in-out;
+        }
+
+        .song--active button,
+        .track__trackTitleButton:hover {
+          opacity: 0.666;
+          text-decoration: underline;
+        }
+      </style>
+    `;
+  }
+
+  /**
+   * Render the HTML shell of the component.
+   * @returns {string} HTML string for the component's template.
+   */
+  renderContainer() {
+    return html`
+      <audio id="audio"></audio>
+      <div class="meta">
+        <img
+          src="${this.placeholder}"
+          alt=""
+          id="artwork"
+          width="350"
+          height="350"
+          loading="lazy"
+          decoding="async" />
+        <div class="trackInfo">
+          <p class="trackInfo__artist">${EMPTY_METADATA}</p>
+          <p class="trackInfo__track">${EMPTY_METADATA}</p>
+          <p class="trackInfo__album">${EMPTY_METADATA}</p>
+          <p class="trackInfo__timer">
+            <span class="trackInfo__currentTime">${EMPTY_METADATA}</span> /
+            <span class="trackInfo__duration">${EMPTY_METADATA}</span>
+          </p>
+        </div>
+      </div>
+      <div class="controls">
+        <div class="sliders">
+          <div class="seekerContainer"><!-- dynamic content --></div>
+          <div class="volumeContainer"><!-- dynamic content --></div>
+        </div>
+        <div class="buttons"><!-- dynamic content --></div>
+      </div>
+      <div class="tracklist"><!-- dynamic content --></div>
+    `;
+  }
+
+  /**
+   * Render the styles and HTML shell together at the given location.
+   * @param {HTMLElement|Node|DocumentFragment} root Where to render the component styles and shell.
+   */
+  renderTemplate(root) {
+    root.innerHTML = `${this.renderStyles()} ${this.renderContainer()}`;
+  }
+
+  /**
    * Creates a button element with the chosen SVG icon.
    * @param id ID of the element.
    * @param icon Type of icon to use from the library.
@@ -175,265 +428,9 @@ export default class Plvylist extends HTMLElement {
   };
 
   /**
-   * Render component styles.
-   * @returns {string} HTML string for the component styles in a `<style>` element.
+   * Render the primary control bar by creating each button element and appending them to the container.
+   * @see createIcon
    */
-  renderStyles() {
-    return html`
-      <style>
-        /* ======
-         * Resets
-         * ====== */
-        :host {
-          box-sizing: border-box;
-          display: block;
-        }
-
-        *,
-        *::after,
-        *::before {
-          box-sizing: inherit;
-          margin: 0;
-          padding: 0;
-        }
-
-        img {
-          block-size: auto;
-          display: block;
-          max-inline-size: 100%;
-        }
-
-        button {
-          background: none;
-          border: none;
-          cursor: pointer;
-          font: inherit;
-          text-align: inherit;
-        }
-
-        /* =====
-         * Theme
-         * ===== */
-        :host {
-          --step--2: clamp(0.78rem, calc(0.77rem + 0.07vw), 0.84rem);
-  --step--1: clamp(0.94rem, calc(0.91rem + 0.14vw), 1.05rem);
-  --step-0: clamp(1.13rem, calc(1.08rem + 0.23vw), 1.31rem);
-  --step-1: clamp(1.35rem, calc(1.28rem + 0.36vw), 1.64rem);
-  --step-2: clamp(1.62rem, calc(1.51rem + 0.54vw), 2.05rem);
-  --step-3: clamp(1.94rem, calc(1.79rem + 0.78vw), 2.56rem);
-  --step-4: clamp(2.33rem, calc(2.11rem + 1.09vw), 3.2rem);
-  --step-5: clamp(2.8rem, calc(2.5rem + 1.51vw), 4.01rem);
-
-          /* SPACING */
-          /* @link https://utopia.fyi/space/calculator?c=320,18,1.2,1600,21,1.25,5,2,&s=0.75|0.5|0.25,1.5|2|3|4|6,s-l */
-          --space-3xs: clamp(0.31rem, calc(0.31rem + 0vw), 0.31rem);
-          --space-2xs: clamp(0.56rem, calc(0.53rem + 0.16vw), 0.69rem);
-          --space-xs: clamp(0.88rem, calc(0.84rem + 0.16vw), 1rem);
-          --space-s: clamp(1.13rem, calc(1.08rem + 0.23vw), 1.31rem);
-          --space-m: clamp(1.69rem, calc(1.61rem + 0.39vw), 2rem);
-          --space-l: clamp(2.25rem, calc(2.16rem + 0.47vw), 2.63rem);
-          --space-xl: clamp(3.38rem, calc(3.23rem + 0.7vw), 3.94rem);
-          --space-2xl: clamp(4.5rem, calc(4.31rem + 0.94vw), 5.25rem);
-          --space-3xl: clamp(6.75rem, calc(6.47rem + 1.41vw), 7.88rem);
-
-          /* ONE-UP PAIRS */
-          --space-3xs-2xs: clamp(0.31rem, calc(0.22rem + 0.47vw), 0.69rem);
-          --space-2xs-xs: clamp(0.56rem, calc(0.45rem + 0.55vw), 1rem);
-          --space-xs-s: clamp(0.88rem, calc(0.77rem + 0.55vw), 1.31rem);
-          --space-s-m: clamp(1.13rem, calc(0.91rem + 1.09vw), 2rem);
-          --space-m-l: clamp(1.69rem, calc(1.45rem + 1.17vw), 2.63rem);
-          --space-l-xl: clamp(2.25rem, calc(1.83rem + 2.11vw), 3.94rem);
-          --space-xl-2xl: clamp(3.38rem, calc(2.91rem + 2.34vw), 5.25rem);
-          --space-2xl-3xl: clamp(4.5rem, calc(3.66rem + 4.22vw), 7.88rem);
-
-          accent-color: var(--plvylist-color-accent, royalblue);
-        }
-
-        img[src^="data:image/svg+xml"] {
-          filter: contrast(0.5); /* Covers the placeholder image */
-        }
-
-        #artwork {
-          margin-inline: auto;
-        }
-
-        /* ============
-         * Meta Section
-         * ============ */
-        .meta {
-          align-items: end;
-          display: grid;
-          gap: var(--space-s);
-        }
-
-        @media (min-width: 750px) {
-          .meta {
-            grid-template-columns: auto 1fr;
-          }
-        }
-
-        /* ================
-         * Controls Section
-         * ================ */
-        .controls {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-          margin-block: var(--space-m);
-        }
-
-        .controls button {
-          display: flex;
-          stroke: currentColor;
-        }
-
-        .controls button:hover svg {
-          opacity: 0.666;
-        }
-
-        /* ===================
-         * Controls :: Sliders
-         * =================== */
-        input[type="range"] {
-          display: block;
-          inline-size: 100%;
-        }
-
-        .sliders {
-          align-items: center;
-          display: grid;
-          gap: var(--space-s);
-        }
-
-        @media (min-width: 750px) {
-          .sliders {
-            grid-template-columns: 2.5fr 1fr;
-          }
-        }
-
-        .sliders > * {
-          inline-size: 100%;
-        }
-
-        .seekerContainer {
-          flex: 1;
-        }
-
-        .volumeContainer {
-          display: flex;
-          gap: 1ch;
-        }
-
-        /* ===================
-         * Controls :: Buttons
-         * =================== */
-        .controlButton {
-          border: 1px solid var(--plvylist-color-button-border, transparent);
-          border-radius: 50%;
-          padding: 0.5rem;
-        }
-
-        .buttons {
-          align-items: center;
-          display: flex;
-          flex-wrap: wrap;
-          gap: var(--space-2xs);
-          justify-content: center;
-        }
-
-        .button--active svg {
-          stroke: var(--plvylist-color-active, crimson);
-        }
-
-        #action {
-          background-color: currentColor;
-          stroke: canvas;
-        }
-
-        /* ==========
-         * Track List
-         * ========== */
-        .tracklist {
-          overflow: auto;
-        }
-
-        .trackList__table {
-          border-collapse: collapse;
-          font-size: var(--step--1);
-          inline-size: 100%;
-          min-inline-size: max-content;
-        }
-
-        .trackList__table :is(th,
-        td) {
-          padding-block: var(--space-3xs);
-          padding-inline: 1ch; 
-          text-align: start;
-        }
-
-        .trackList__table th {
-          text-transform: uppercase;
-        }
-
-        .track__trackTitleButton {
-          transition: 0.1s color ease-in-out;
-        }
-
-        .song--active button,
-        .track__trackTitleButton:hover {
-          opacity: 0.666;
-          text-decoration: underline;
-        }
-      </style>
-    `;
-  }
-
-  /**
-   * Render the HTML shell of the component.
-   * @returns {string} HTML string for the component's template.
-   */
-  renderContainer() {
-    return html`
-      <audio id="audio"></audio>
-      <div class="meta">
-        <img
-          src="${this.placeholder}"
-          alt=""
-          id="artwork"
-          width="350"
-          height="350"
-          loading="lazy"
-          decoding="async" />
-        <div class="trackInfo">
-          <p class="artist">${EMPTY_METADATA}</p>
-          <p class="track">${EMPTY_METADATA}</p>
-          <p class="album">${EMPTY_METADATA}</p>
-          <p class="timer">
-            <span class="currentTime">${EMPTY_METADATA}</span> /
-            <span class="duration">${EMPTY_METADATA}</span>
-          </p>
-        </div>
-      </div>
-      <div class="controls">
-        <div class="sliders">
-          <div class="seekerContainer"><!-- dynamic content --></div>
-          <div class="volumeContainer"><!-- dynamic content --></div>
-        </div>
-        <div class="buttons"><!-- dynamic content --></div>
-      </div>
-      <div class="tracklist"><!-- dynamic content --></div>
-    `;
-  }
-
-  /**
-   * Render the styles and HTML shell together at the given location.
-   * @param {HTMLElement|Node|DocumentFragment} root Where to render the component styles and shell.
-   */
-  renderTemplate(root) {
-    root.innerHTML = `${this.renderStyles()} ${this.renderContainer()}`;
-  }
-
-  /** Render the primary control bar by creating each button element and appending them to the container. */
   renderPrimaryControls = () => {
     if (this.controlsPrimaryContainer) {
       this.controlsPrimaryContainer.appendChild(this.createIcon("shuffle", this.icons.shuffle));
@@ -446,7 +443,10 @@ export default class Plvylist extends HTMLElement {
     }
   };
 
-  /** Render the track seeker by creating the input element and appending it to the container. */
+  /**
+   * Render the track seeker by creating the input element and appending it to the container.
+   * @see createSlider
+   */
   renderSeekerBar = () => {
     if (this.seekerContainer) {
       const bar = this.createSlider("seeker", {
@@ -460,7 +460,10 @@ export default class Plvylist extends HTMLElement {
     }
   };
 
-  /** Render the volume bar by creating the input and associated button and appending them to the container. */
+  /**
+   * Render the volume bar by creating the input and associated button and appending them to the container.
+   * @see createIcon
+   */
   renderVolumeBar = () => {
     if (this.volumeContainer) {
       const button = this.createIcon("volumeButton", this.icons.volumeMid);
@@ -497,7 +500,7 @@ export default class Plvylist extends HTMLElement {
 
     this.tracks.forEach((track, index) => {
       list += html`<tr>
-        <td class="track" data-track="${index}">
+        <td class="trackList__track" data-track="${index}">
           <button class="track__trackTitleButton">
             <span class="track__trackTitle">${track.title}</span>
           </button>
@@ -572,7 +575,7 @@ export default class Plvylist extends HTMLElement {
    * @type {HTMLParagraphElement}
    */
   get artist() {
-    return this.queryShadowRoot(".artist");
+    return this.queryShadowRoot(".trackInfo__artist");
   }
 
   /**
@@ -580,7 +583,7 @@ export default class Plvylist extends HTMLElement {
    * @type {HTMLParagraphElement}
    */
   get track() {
-    return this.queryShadowRoot(".track");
+    return this.queryShadowRoot(".trackInfo__track");
   }
 
   /**
@@ -588,7 +591,7 @@ export default class Plvylist extends HTMLElement {
    * @type {HTMLParagraphElement}
    */
   get album() {
-    return this.queryShadowRoot(".album");
+    return this.queryShadowRoot(".trackInfo__album");
   }
 
   /**
@@ -596,7 +599,7 @@ export default class Plvylist extends HTMLElement {
    * @type {HTMLSpanElement}
    */
   get current() {
-    return this.queryShadowRoot(".currentTime");
+    return this.queryShadowRoot(".trackInfo__currentTime");
   }
 
   /**
@@ -604,7 +607,7 @@ export default class Plvylist extends HTMLElement {
    * @type {HTMLSpanElement}
    */
   get duration() {
-    return this.queryShadowRoot(".duration");
+    return this.queryShadowRoot(".trackInfo__duration");
   }
 
   /**
