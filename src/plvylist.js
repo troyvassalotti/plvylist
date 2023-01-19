@@ -215,6 +215,37 @@ export default class Plvylist extends HTMLElement {
          * Theme
          * ===== */
         :host {
+          --step--2: clamp(0.78rem, calc(0.77rem + 0.07vw), 0.84rem);
+  --step--1: clamp(0.94rem, calc(0.91rem + 0.14vw), 1.05rem);
+  --step-0: clamp(1.13rem, calc(1.08rem + 0.23vw), 1.31rem);
+  --step-1: clamp(1.35rem, calc(1.28rem + 0.36vw), 1.64rem);
+  --step-2: clamp(1.62rem, calc(1.51rem + 0.54vw), 2.05rem);
+  --step-3: clamp(1.94rem, calc(1.79rem + 0.78vw), 2.56rem);
+  --step-4: clamp(2.33rem, calc(2.11rem + 1.09vw), 3.2rem);
+  --step-5: clamp(2.8rem, calc(2.5rem + 1.51vw), 4.01rem);
+
+          /* SPACING */
+          /* @link https://utopia.fyi/space/calculator?c=320,18,1.2,1600,21,1.25,5,2,&s=0.75|0.5|0.25,1.5|2|3|4|6,s-l */
+          --space-3xs: clamp(0.31rem, calc(0.31rem + 0vw), 0.31rem);
+          --space-2xs: clamp(0.56rem, calc(0.53rem + 0.16vw), 0.69rem);
+          --space-xs: clamp(0.88rem, calc(0.84rem + 0.16vw), 1rem);
+          --space-s: clamp(1.13rem, calc(1.08rem + 0.23vw), 1.31rem);
+          --space-m: clamp(1.69rem, calc(1.61rem + 0.39vw), 2rem);
+          --space-l: clamp(2.25rem, calc(2.16rem + 0.47vw), 2.63rem);
+          --space-xl: clamp(3.38rem, calc(3.23rem + 0.7vw), 3.94rem);
+          --space-2xl: clamp(4.5rem, calc(4.31rem + 0.94vw), 5.25rem);
+          --space-3xl: clamp(6.75rem, calc(6.47rem + 1.41vw), 7.88rem);
+
+          /* ONE-UP PAIRS */
+          --space-3xs-2xs: clamp(0.31rem, calc(0.22rem + 0.47vw), 0.69rem);
+          --space-2xs-xs: clamp(0.56rem, calc(0.45rem + 0.55vw), 1rem);
+          --space-xs-s: clamp(0.88rem, calc(0.77rem + 0.55vw), 1.31rem);
+          --space-s-m: clamp(1.13rem, calc(0.91rem + 1.09vw), 2rem);
+          --space-m-l: clamp(1.69rem, calc(1.45rem + 1.17vw), 2.63rem);
+          --space-l-xl: clamp(2.25rem, calc(1.83rem + 2.11vw), 3.94rem);
+          --space-xl-2xl: clamp(3.38rem, calc(2.91rem + 2.34vw), 5.25rem);
+          --space-2xl-3xl: clamp(4.5rem, calc(3.66rem + 4.22vw), 7.88rem);
+
           accent-color: var(--plvylist-color-accent, royalblue);
         }
 
@@ -222,14 +253,42 @@ export default class Plvylist extends HTMLElement {
           filter: contrast(0.5); /* Covers the placeholder image */
         }
 
+        #artwork {
+          margin-inline: auto;
+        }
+
         /* ============
          * Meta Section
          * ============ */
         .meta {
-          align-items: flex-end;
+          align-items: end;
+          display: grid;
+          gap: var(--space-s);
+        }
+
+        @media (min-width: 750px) {
+          .meta {
+            grid-template-columns: auto 1fr;
+          }
+        }
+
+        /* ================
+         * Controls Section
+         * ================ */
+        .controls {
           display: flex;
-          flex-wrap: wrap;
-          gap: 1em;
+          flex-direction: column;
+          gap: 0.5rem;
+          margin-block: var(--space-m);
+        }
+
+        .controls button {
+          display: flex;
+          stroke: currentColor;
+        }
+
+        .controls button:hover svg {
+          opacity: 0.666;
         }
 
         /* ===================
@@ -242,8 +301,18 @@ export default class Plvylist extends HTMLElement {
 
         .sliders {
           align-items: center;
-          display: flex;
-          gap: 2rem;
+          display: grid;
+          gap: var(--space-s);
+        }
+
+        @media (min-width: 750px) {
+          .sliders {
+            grid-template-columns: 2.5fr 1fr;
+          }
+        }
+
+        .sliders > * {
+          inline-size: 100%;
         }
 
         .seekerContainer {
@@ -264,26 +333,11 @@ export default class Plvylist extends HTMLElement {
           padding: 0.5rem;
         }
 
-        .controls {
-          display: flex;
-          flex-direction: column;
-          gap: .5rem;
-          margin-block: 1rem;
-        }
-
-        .controls button {
-          display: flex;
-          stroke: currentColor;
-        }
-
-        .controls button:hover svg {
-          opacity: 0.666;
-        }
-
         .buttons {
           align-items: center;
           display: flex;
-          gap: 2ch;
+          flex-wrap: wrap;
+          gap: var(--space-2xs);
           justify-content: center;
         }
 
@@ -299,12 +353,21 @@ export default class Plvylist extends HTMLElement {
         /* ==========
          * Track List
          * ========== */
-        .trackList__table {
-          inline-size: 100%;
-          table-layout: fixed;
+        .tracklist {
+          overflow: auto;
         }
 
-        .trackList__table th, td {
+        .trackList__table {
+          border-collapse: collapse;
+          font-size: var(--step--1);
+          inline-size: 100%;
+          min-inline-size: max-content;
+        }
+
+        .trackList__table :is(th,
+        td) {
+          padding-block: var(--space-3xs);
+          padding-inline: 1ch; 
           text-align: start;
         }
 
@@ -337,8 +400,8 @@ export default class Plvylist extends HTMLElement {
           src="${this.placeholder}"
           alt=""
           id="artwork"
-          width="300"
-          height="300"
+          width="350"
+          height="350"
           loading="lazy"
           decoding="async" />
         <div class="trackInfo">
