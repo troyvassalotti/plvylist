@@ -1,7 +1,6 @@
 /**
  * @file Plvylist Web Component
  *
- * @todo update colors
  * @todo update readme
  * @todo update to major verison bump
  */
@@ -15,7 +14,7 @@ const BREAKPOINT_MEDIUM = "750px";
 /**
  * Fetches data from a JSON file to look for its tracks.
  * @param {string} location Path to JSON file.
- * @returns {Array<Record<string, string>} Tracks field from data.
+ * @returns {Record<string, string>[]} Tracks field from data.
  */
 const fetchTrackData = async (location) => {
   if (location) {
@@ -38,6 +37,9 @@ const fetchTrackData = async (location) => {
  * @cssproperty --plvylist-color-accent - Accent color for form elements.
  * @cssproperty --plvylist-color-button-border - Border color for button controls.
  * @cssproperty --plvylist-color-active - Color to use for changed button states (currently only the loop button).
+ * @cssproperty --plvylist-action-button-background - Background color for the action button.
+ * @cssproperty --plvylist-action-button-stroke - Stroke color for the action button.
+ * @cssproperty --plvylist-tracklist-font-size - Font size for the track list.
  *
  * @example
  * ```html
@@ -150,6 +152,7 @@ export default class Plvylist extends HTMLElement {
         button {
           background: none;
           border: none;
+          color: inherit;
           cursor: pointer;
           font: inherit;
           text-align: inherit;
@@ -169,8 +172,9 @@ export default class Plvylist extends HTMLElement {
           --space-2xs: clamp(0.56rem, calc(0.53rem + 0.16vw), 0.69rem);
           --space-xs: clamp(0.88rem, calc(0.84rem + 0.16vw), 1rem);
           --space-s: clamp(1.13rem, calc(1.08rem + 0.23vw), 1.31rem);
-          --space-m: clamp(1.69rem, calc(1.61rem + 0.39vw), 2rem);
-          --space-l: clamp(2.25rem, calc(2.16rem + 0.47vw), 2.63rem);
+
+          /* OTHER */
+          --hover-value: 0.666; /* Rock on */
 
           accent-color: var(--plvylist-color-accent, royalblue);
         }
@@ -204,17 +208,8 @@ export default class Plvylist extends HTMLElement {
         .controls {
           display: flex;
           flex-direction: column;
-          gap: 0.5rem;
+          gap: var(--space-2xs);
           margin-block: var(--space-s);
-        }
-
-        .controls button {
-          display: flex;
-          stroke: currentColor;
-        }
-
-        .controls button:hover svg {
-          opacity: 0.666;
         }
 
         /* ===================
@@ -247,7 +242,7 @@ export default class Plvylist extends HTMLElement {
 
         .volumeContainer {
           display: flex;
-          gap: 1ch;
+          gap: var(--space-3xs);
         }
 
         /* ===================
@@ -256,7 +251,9 @@ export default class Plvylist extends HTMLElement {
         .controlButton {
           border: 1px solid var(--plvylist-color-button-border, transparent);
           border-radius: 50%;
-          padding: 0.5rem;
+          display: flex;
+          stroke: currentColor;
+          padding: var(--space-3xs);
         }
 
         .buttons {
@@ -267,13 +264,13 @@ export default class Plvylist extends HTMLElement {
           justify-content: center;
         }
 
-        .button--active svg {
-          stroke: var(--plvylist-color-active, crimson);
+        .button--active {
+          color: var(--plvylist-color-active, crimson);
         }
 
         #action {
-          background-color: currentColor;
-          stroke: canvas;
+          background-color: var(--plvylist-action-button-background, currentColor);
+          stroke: var(--plvylist-action-button-stroke, canvas);
         }
 
         /* ==========
@@ -286,14 +283,14 @@ export default class Plvylist extends HTMLElement {
         .trackList__table {
           border-collapse: collapse;
           counter-reset: tracks;
-          font-size: var(--step--1);
+          font-size: var(--plvylist-tracklist-font-size, unset);
           inline-size: 100%;
           min-inline-size: max-content;
         }
 
         .trackList__table :is(th, td) {
           padding-block: var(--cell-padding, var(--space-3xs));
-          padding-inline: 1ch;
+          padding-inline: var(--space-2xs);
           text-align: start;
         }
 
@@ -315,14 +312,10 @@ export default class Plvylist extends HTMLElement {
           content: counter(tracks) ".";
         }
 
-        .track__trackTitleButton {
-          transition: 0.1s color ease-in-out;
-        }
-
         .song--active button,
-        .track__trackTitleButton:hover {
-          opacity: 0.666;
-          text-decoration: underline;
+        .track__trackTitleButton:hover,
+        .controlButton:hover {
+          opacity: var(--hover-value);
         }
       </style>
     `;
