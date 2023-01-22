@@ -26,6 +26,13 @@ const fetchTrackData = async (location) => {
 };
 
 /**
+ * Check if a given key exists in any object within an array of objects.
+ * @param {string} key Key to look for in array of objects.
+ * @returns {Boolean}
+ */
+const checkForKeyInArray = (key) => this.tracks.some((obj) => Object.keys(obj).includes(key));
+
+/**
  * @tag plvy-list
  * @summary A media player for playlists or other collections of audio.
  *
@@ -495,6 +502,9 @@ export default class Plvylist extends HTMLElement {
     }
 
     let list = html``;
+
+    const hasAlbum = checkForKeyInArray("album");
+    const hasArtist = checkForKeyInArray("artist");
 
     this.tracks.forEach((track, index) => {
       list += html`<tr>
