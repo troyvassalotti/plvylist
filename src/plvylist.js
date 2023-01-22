@@ -36,6 +36,7 @@ const fetchTrackData = async (location) => {
  *
  * @cssproperty --plvylist-color-accent - Accent color for form elements.
  * @cssproperty --plvylist-color-button-border - Border color for button controls.
+ * @cssproperty --plvylist-color-button-stroke - Stroke color for button controls.
  * @cssproperty --plvylist-color-active - Color to use for changed button states (currently only the loop button).
  * @cssproperty --plvylist-action-button-background - Background color for the action button.
  * @cssproperty --plvylist-action-button-stroke - Stroke color for the action button.
@@ -252,7 +253,7 @@ export default class Plvylist extends HTMLElement {
           border: 1px solid var(--plvylist-color-button-border, transparent);
           border-radius: 50%;
           display: flex;
-          stroke: currentColor;
+          stroke: var(--plvylist-color-button-stroke, currentColor);
           padding: var(--space-3xs);
         }
 
@@ -316,6 +317,10 @@ export default class Plvylist extends HTMLElement {
         .track__trackTitleButton:hover,
         .controlButton:hover {
           opacity: var(--hover-value);
+        }
+
+        .track__trackTitleButton:hover {
+          text-decoration: underline;
         }
       </style>
     `;
