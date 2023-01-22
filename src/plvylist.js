@@ -503,6 +503,10 @@ export default class Plvylist extends HTMLElement {
 
     let list = html``;
 
+    /**
+     * @todo Only render table columns if these exist
+     * @todo Throw error if file doesn't exist somewhere
+     */
     const hasAlbum = checkForKeyInArray("album");
     const hasArtist = checkForKeyInArray("artist");
 
