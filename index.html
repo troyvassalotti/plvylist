@@ -4,44 +4,85 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Plyvlist | Web Audio Component</title>
+    <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css" />
     <script type="module" src="/node_modules/api-viewer-element/lib/api-viewer.js"></script>
     <script type="module" src="/src/plvylist.js"></script>
     <style>
-      html {
-        color-scheme: light dark;
-        font-family: system-ui, sans-serif;
-      }
-
       body {
-        inline-size: 90%;
-        margin-inline: auto;
-      }
-
-      header {
-        border-block-end: 1px solid;
-        font-size: 2rem;
-        margin-block: 2rem;
+        grid-template-columns: 1fr min(70rem, 90%) 1fr;
       }
 
       api-viewer {
         max-inline-size: 100%;
       }
+
+      .center {
+        text-align: center;
+      }
     </style>
   </head>
   <body>
     <main>
-      <section class="demo">
+      <section class="welcome">
         <header>
-          <h1>Plvylist Demo</h1>
+          <h1 class="center"><code>plvy-list</code> is a web component.</h1>
         </header>
+        <ul>
+          <li>Install through npm: <code>npm i plvylist</code>.</li>
+          <li>
+            Import from something like Skypack:
+            <code
+              >&lt;script type=&quot;module&quot;
+              src=&quot;https://cdn.skypack.dev/plvylist&quot;&gt;&lt;/script&gt;</code
+            >.
+          </li>
+        </ul>
+        <p>
+          Import (if installed with npm) or add the script (if installed manually) to your page,
+          then place the element <code>&lt;plvy-list file="path/to/tracks.json"&gt;&lt;/plvy-list&gt;</code> wherever you want
+          it.
+        </p>
+        <p>
+          The only required HTML attribute for Plvylist to work is <code>file</code> which accepts a
+          path to a <code>.json</code> file describing your tracks:
+          <code>file=&quot;path/to/tracks.json&quot;</code>. The syntax for the file is as
+          follows:
+        </p>
+        <pre><code class="lang-json">{
+  <span class="hljs-attr">"tracks"</span>: [
+    {
+      <span class="hljs-attr">"file"</span>: <span class="hljs-string">"path/to/song.mp3"</span>,
+      <span class="hljs-attr">"title"</span>: <span class="hljs-string">"Song Name"</span>,
+      <span class="hljs-attr">"artist"</span>: <span class="hljs-string">"Artist Name"</span>,
+      <span class="hljs-attr">"artistUrl"</span>: <span class="hljs-string">"https://www.artist.com"</span>,
+      <span class="hljs-attr">"album"</span>: <span class="hljs-string">"Album/Collection Name"</span>,
+      <span class="hljs-attr">"albumUrl"</span>: <span class="hljs-string">"https://www.album.com"</span>,
+      <span class="hljs-attr">"artwork"</span>: <span class="hljs-string">"path/to/artwork.jpg"</span>
+    }
+  ]
+}
+</code></pre>
+        <p>
+          <strong
+            >Each key aside from <code>file</code> is optional and will default to placeholders if
+            they aren&#39;t provided.</strong
+          >
+        </p>
+        <p>View <a href="#demo">the demo</a> or <a href="#docs">the documentation</a>.</p>
+      </section>
+      <section class="demo" id="demo">
+        <h2>Demo</h2>
         <plvy-list file="/tracks.json" volume="0.7"></plvy-list>
       </section>
-      <section class="docs">
+      <section class="docs" id="docs">
         <header>
           <h2>Documentation</h2>
         </header>
         <api-viewer src="/custom-elements.json"></api-viewer>
       </section>
     </main>
+    <footer>
+      <p>Made by <a href="https://www.troyv.dev">Troy</a>.</p>
+    </footer>
   </body>
 </html>

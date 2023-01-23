@@ -11,9 +11,9 @@ Get Plvylist from one of the following ways:
 
 ## Usage
 
-Import (if installed with npm) or add the script (if installed manually) to your page, then place the element `<plvylist-player></plvylist-player>` wherever you want it.
+Import (if installed with npm) or add the script (if installed manually) to your page, then place the element `<plvy-list></plvy-list>` wherever you want it.
 
-The only required HTML attribute for Plvylist to work is `file` which accepts a path to a `.json` file describing your tracks: `file="location/to/files.json"`. The syntax for the file is as follows:
+The only required HTML attribute for Plvylist to work is `file` which accepts a path to a `.json` file describing your tracks: `file="path/to/tracks.json"`. The syntax for the file is as follows:
 
 ```json
 {
@@ -32,12 +32,6 @@ The only required HTML attribute for Plvylist to work is `file` which accepts a 
 ```
 
 **Each key aside from `file` is optional and will default to placeholders if they aren't provided.**
-
-You can do some customization with these other HTML attributes:
-
-- `placeholder="path/to/placeholder.jpg"` in case no cover art is available for a song and you want to provide your own default.
-- `starting-volume="some number between 0.0 and 1"` if you want to start the component at a different volume level than half-full.
-- `starting-time="honestly I don't know, but it is a number"` if you want to change the initial starting time for the component, but through testing I don't really know how this works aside from knowing it's an option I've given you.
 
 ## Notes
 
