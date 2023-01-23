@@ -1,8 +1,5 @@
 /**
  * @file Plvylist Web Component
- *
- * @todo update readme
- * @todo update to major verison bump
  */
 
 import { html } from "common-tags";
@@ -27,10 +24,11 @@ const fetchTrackData = async (location) => {
 
 /**
  * Check if a given key exists in any object within an array of objects.
+ * @param {any[]} arr Array of objects.
  * @param {string} key Key to look for in array of objects.
  * @returns {Boolean}
  */
-const checkForKeyInArray = (key) => this.tracks.some((obj) => Object.keys(obj).includes(key));
+const checkForKeyInArray = (arr, key) => arr.some((obj) => Object.keys(obj).includes(key));
 
 /**
  * @tag plvy-list
@@ -42,6 +40,7 @@ const checkForKeyInArray = (key) => this.tracks.some((obj) => Object.keys(obj).i
  * @attribute {string} starting-time - Some number (format unsure) if you want to change the initial starting time of component. Through testing, I don't really know how this works aside from knowing it's an option I've given you.
  *
  * @cssproperty --plvylist-color-accent - Accent color for form elements.
+ * @cssproperty --plvylist-color-button-active - Color for buttons when hovered.
  * @cssproperty --plvylist-color-button-border - Border color for button controls.
  * @cssproperty --plvylist-color-button-stroke - Stroke color for button controls.
  * @cssproperty --plvylist-color-active - Color to use for changed button states (currently only the loop button).
@@ -68,6 +67,9 @@ export default class Plvylist extends HTMLElement {
 
     this.audioOverride = false; // Helps manage when tracks should be started or paused during selection.
     this.currentTrackIndex = undefined;
+
+    this.hasArtists = undefined;
+    this.hasAlbums = undefined;
 
     /** All icons. */
     this.icons = {
@@ -182,9 +184,10 @@ export default class Plvylist extends HTMLElement {
           --space-s: clamp(1.13rem, calc(1.08rem + 0.23vw), 1.31rem);
 
           /* OTHER */
-          --hover-value: 0.666; /* Rock on */
+          --accent-color: #2277cc;
+          --active-color: #ee0011;
 
-          accent-color: var(--plvylist-color-accent, royalblue);
+          accent-color: var(--plvylist-color-accent, var(--accent-color));
         }
 
         img[src^="data:image/svg+xml"] {
@@ -262,6 +265,11 @@ export default class Plvylist extends HTMLElement {
           display: flex;
           stroke: var(--plvylist-color-button-stroke, currentColor);
           padding: var(--space-3xs);
+          transition: color 0.1s ease;
+        }
+
+        .controlButton:hover {
+          color: var(--plvylist-color-button-active, var(--accent-color));
         }
 
         .buttons {
@@ -273,7 +281,7 @@ export default class Plvylist extends HTMLElement {
         }
 
         .button--active {
-          color: var(--plvylist-color-active, crimson);
+          color: var(--plvylist-color-active, var(--active-color));
         }
 
         #action {
@@ -321,12 +329,17 @@ export default class Plvylist extends HTMLElement {
         }
 
         .song--active button,
-        .track__trackTitleButton:hover,
-        .controlButton:hover {
-          opacity: var(--hover-value);
+        .track__trackTitleButton:hover {
+          color: var(--plvylist-color-active, var(--active-color));
         }
 
-        .track__trackTitleButton:hover {
+        .track__trackAlbumUrl,
+        .track__trackArtistUrl {
+          color: currentColor;
+          text-decoration: none;
+        }
+
+        :is(.track__trackAlbumUrl, .track__trackArtistUrl, .track__trackTitleButton):hover {
           text-decoration: underline;
         }
       </style>
@@ -350,8 +363,8 @@ export default class Plvylist extends HTMLElement {
           loading="lazy"
           decoding="async" />
         <div class="trackInfo">
-          <p class="trackInfo__artist">${EMPTY_METADATA}</p>
           <p class="trackInfo__track">${EMPTY_METADATA}</p>
+          <p class="trackInfo__artist">${EMPTY_METADATA}</p>
           <p class="trackInfo__album">${EMPTY_METADATA}</p>
           <p class="trackInfo__timer">
             <span class="trackInfo__currentTime">${EMPTY_METADATA}</span> /
@@ -494,62 +507,78 @@ export default class Plvylist extends HTMLElement {
    * @param {boolean} shuffled Whether or not we're getting tracks from a shuffled list or from the file.
    */
   renderTrackList = async (shuffled = false) => {
-    if (!shuffled) {
-      // Ignore VS Code saying await has no effect here.
-      this.tracks = await fetchTrackData(this.file);
-    } else {
-      this.tracks = this.shuffleTracks();
+    try {
+      if (!shuffled) {
+        // Ignore VS Code saying await has no effect here.
+        this.tracks = await fetchTrackData(this.file);
+      } else {
+        this.tracks = this.shuffleTracks();
+      }
+
+      if (!checkForKeyInArray(this.tracks, "file")) {
+        throw new Error("No files were found.");
+      }
+
+      let list = html``;
+
+      this.hasAlbums = checkForKeyInArray(this.tracks, "album");
+      this.hasArtists = checkForKeyInArray(this.tracks, "artist");
+
+      this.tracks.forEach((track, index) => {
+        const artistHTML = html`<span class="track__trackArtist">${track.artist}</span>`;
+        const albumHTML = html`<span class="track__trackAlbum">${track.album}</span>`;
+        list += html`<tr>
+          <td class="trackList__track" data-track="${index}">
+            <button class="track__trackTitleButton">
+              <span class="track__trackTitle">${track.title}</span>
+            </button>
+          </td>
+          ${this.hasArtists && track.artist
+            ? html`<td>
+                ${track.artistUrl
+                  ? html`<a class="track__trackArtistUrl" href="${track.artistUrl}"
+                      >${artistHTML}</a
+                    >`
+                  : html`${artistHTML}`}
+              </td>`
+            : html``}
+          ${this.hasAlbums && track.album
+            ? html`<td>
+                ${track.albumUrl
+                  ? html`<a class="track__trackAlbumUrl" href="${track.albumUrl}">${albumHTML}</a>`
+                  : html`${albumHTML}`}
+              </td>`
+            : html``}
+        </tr>`;
+      });
+
+      this.songsContainer.innerHTML = html`<table class="trackList__table">
+        <thead>
+          <th>Track</th>
+          ${this.hasArtists ? html`<th>Artist</th>` : html``}
+          ${this.hasAlbums ? html`<th>Album</th>` : html``}
+        </thead>
+        <tbody>
+          ${list}
+        </tbody>
+      </table>`;
+
+      this.trackList.forEach((track, index) =>
+        track.addEventListener("click", () => {
+          if (this.currentTrackIsUndefined()) {
+            this.loadTrack(index);
+            this.playOrPause("play");
+          } else if (this.audio.paused) {
+            this.loadTrack(index);
+          } else {
+            this.loadTrack(index);
+            this.audio.play();
+          }
+        })
+      );
+    } catch (error) {
+      console.error(error);
     }
-
-    let list = html``;
-
-    /**
-     * @todo Only render table columns if these exist
-     * @todo Throw error if file doesn't exist somewhere
-     */
-    const hasAlbum = checkForKeyInArray("album");
-    const hasArtist = checkForKeyInArray("artist");
-
-    this.tracks.forEach((track, index) => {
-      list += html`<tr>
-        <td class="trackList__track" data-track="${index}">
-          <button class="track__trackTitleButton">
-            <span class="track__trackTitle">${track.title}</span>
-          </button>
-        </td>
-        <td>
-          <span class="track__trackArtist">${track.artist}</span>
-        </td>
-        <td>
-          <span class="track__trackAlbum">${track.album}</span>
-        </td>
-      </tr>`;
-    });
-
-    this.songsContainer.innerHTML = html`<table class="trackList__table">
-      <thead>
-        <th>Track</th>
-        <th>Artist</th>
-        <th>Album</th>
-      </thead>
-      <tbody>
-        ${list}
-      </tbody>
-    </table>`;
-
-    this.trackList.forEach((track, index) =>
-      track.addEventListener("click", () => {
-        if (this.currentTrackIsUndefined()) {
-          this.loadTrack(index);
-          this.playOrPause("play");
-        } else if (this.audio.paused) {
-          this.loadTrack(index);
-        } else {
-          this.loadTrack(index);
-          this.audio.play();
-        }
-      })
-    );
   };
 
   /**
