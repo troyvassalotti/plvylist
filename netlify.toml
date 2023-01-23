@@ -1,0 +1,11 @@
+[build]
+command = "npm run vite::docs"
+publish = "docs"
+
+[[headers]]
+for = "/*"
+
+  [headers.values]
+  X-Content-Type-Options = "nosniff"
+  X-Frame-Options = "SAMEORIGIN"
+  X-XSS-Protection = "1"
