@@ -22,7 +22,10 @@
   "scripts": {
     "start": "vite",
     "vite::build": "vite build",
+    "vite::docs": "vite build --mode docs",
+    "preview::docs": "vite preview --mode docs",
     "build": "npm-run-all prettier::format vite::build",
+    "docs": "npm-run-all vite::docs preview::docs",
     "prettier::lint": "prettier --check .",
     "prettier::format": "prettier --write ."
   },

@@ -10,22 +10,29 @@ const ideIntegrations = {
 };
 
 // https://vitejs.dev/config/
-export default defineConfig({
-  build: {
-    lib: {
-      entry: "src/plvylist.js",
-      formats: ["es"],
-    },
-  },
-  plugins: [
-    VitePluginCustomElementsManifest({
-      files: ["./src/plvylist.js"],
-      plugins: [
-        asyncFunctionPlugin(),
-        jsdocExamplePlugin(),
-        generateCustomData(ideIntegrations),
-        generateWebTypes(ideIntegrations),
-      ],
-    }),
-  ],
+export default defineConfig(({ command, mode, ssrBuild }) => {
+  const buildOptions =
+    mode === "docs"
+      ? { outDir: "docs" }
+      : {
+          lib: {
+            entry: "src/plvylist.js",
+            formats: ["es"],
+          },
+        };
+        
+  return {
+    build: buildOptions,
+    plugins: [
+      VitePluginCustomElementsManifest({
+        files: ["./src/plvylist.js"],
+        plugins: [
+          asyncFunctionPlugin(),
+          jsdocExamplePlugin(),
+          generateCustomData(ideIntegrations),
+          generateWebTypes(ideIntegrations),
+        ],
+      }),
+    ],
+  };
 });
