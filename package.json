@@ -8,7 +8,7 @@
     ".": "./dist/plvylist.js"
   },
   "files": [
-    "dist/plvylist.js"
+    "dist"
   ],
   "repository": {
     "type": "git",
