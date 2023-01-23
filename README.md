@@ -39,10 +39,6 @@ You can do some customization with these other HTML attributes:
 - `starting-volume="some number between 0.0 and 1"` if you want to start the component at a different volume level than half-full.
 - `starting-time="honestly I don't know, but it is a number"` if you want to change the initial starting time for the component, but through testing I don't really know how this works aside from knowing it's an option I've given you.
 
-## Styling
-
-Inheritable properties will flow into `plvylist`; this means you can set properties like color and typography on the element or via a class and they will take effect. In addition, a set of CSS custom properties are available. Check the `custom-elements-manifest` provided in the package for more info.
-
 ## Notes
 
 Placeholder image attribution: https://www.svgrepo.com/svg/36360/compact-disc
