@@ -4,7 +4,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Plyvlist | Web Audio Component</title>
-    <script type="module" src="/src/plvylist-player.js"></script>
+    <script type="module" src="/node_modules/api-viewer-element/lib/api-viewer.js"></script>
+    <script type="module" src="/src/plvylist.js"></script>
     <style>
       html {
         color-scheme: light dark;
@@ -14,24 +15,33 @@
       body {
         inline-size: 90%;
         margin-inline: auto;
-        max-inline-size: 850px;
       }
 
       header {
-        text-align: center;
+        border-block-end: 1px solid;
+        font-size: 2rem;
+        margin-block: 2rem;
+      }
+
+      api-viewer {
+        max-inline-size: 100%;
       }
     </style>
   </head>
   <body>
     <main>
-      <header>
-        <h1>Plvylist Demo Page</h1>
-        <p>
-          You'll be listening to an album I wrote,
-          <a href="https://justtroy.bandcamp.com">Alone in a Crowded Room</a>.
-        </p>
-      </header>
-      <plvylist-player tracks="/tracks.json" volume="0.7"></plvylist-player>
+      <section class="demo">
+        <header>
+          <h1>Plvylist Demo</h1>
+        </header>
+        <plvy-list file="/tracks.json" volume="0.7"></plvy-list>
+      </section>
+      <section class="docs">
+        <header>
+          <h2>Documentation</h2>
+        </header>
+        <api-viewer src="/custom-elements.json"></api-viewer>
+      </section>
     </main>
   </body>
 </html>
