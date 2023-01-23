@@ -20,7 +20,7 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
             formats: ["es"],
           },
         };
-        
+
   return {
     build: buildOptions,
     plugins: [
