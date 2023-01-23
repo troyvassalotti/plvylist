@@ -31,6 +31,60 @@ const fetchTrackData = async (location) => {
 const checkForKeyInArray = (arr, key) => arr.some((obj) => Object.keys(obj).includes(key));
 
 /**
+ * Creates a range input for sliders.
+ * @param id ID of the element.
+ * @param options Any additional attributes and their values to apply.
+ * @returns {HTMLInputElement}
+ */
+function createSlider(id, options = {}) {
+  const input = document.createElement("input");
+  input.id = id;
+  input.type = "range";
+
+  for (const option in options) {
+    input.setAttribute(option, options[option]);
+  }
+
+  return input;
+}
+
+/**
+ * Creates a button element with the chosen SVG icon.
+ * @param id ID of the element.
+ * @param icon Type of icon to use from the library.
+ * @param type Icon could be "large" or default size.
+ * @returns {HTMLButtonElement}
+ */
+function createIcon(id, icon, type = "", classes = ["controlButton"]) {
+  const button = document.createElement("button");
+  button.id = id;
+  button.classList.add(...classes);
+
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", "0 0 24 24");
+  svg.setAttribute("stroke-width", "1.5");
+  svg.setAttribute("stroke-linecap", "round");
+  svg.setAttribute("stroke-linejoin", "round");
+  svg.setAttribute("fill", "none");
+
+  switch (type) {
+    case "large":
+      svg.setAttribute("width", "44");
+      svg.setAttribute("height", "44");
+      break;
+    default:
+      svg.setAttribute("width", "24");
+      svg.setAttribute("height", "24");
+      break;
+  }
+
+  svg.innerHTML = icon;
+  button.appendChild(svg);
+
+  return button;
+}
+
+/**
  * @tag plvy-list
  * @summary A media player for playlists or other collections of audio.
  *
@@ -39,14 +93,14 @@ const checkForKeyInArray = (arr, key) => arr.some((obj) => Object.keys(obj).incl
  * @attribute {string} starting-volume - Number between 0 and 1 to set the volume at.
  * @attribute {string} starting-time - Some number (format unsure) if you want to change the initial starting time of component. Through testing, I don't really know how this works aside from knowing it's an option I've given you.
  *
- * @cssproperty --plvylist-color-accent - Accent color for form elements.
- * @cssproperty --plvylist-color-button-active - Color for buttons when hovered.
- * @cssproperty --plvylist-color-button-border - Border color for button controls.
- * @cssproperty --plvylist-color-button-stroke - Stroke color for button controls.
- * @cssproperty --plvylist-color-active - Color to use for changed button states (currently only the loop button).
- * @cssproperty --plvylist-action-button-background - Background color for the action button.
- * @cssproperty --plvylist-action-button-stroke - Stroke color for the action button.
- * @cssproperty --plvylist-tracklist-font-size - Font size for the track list.
+ * @cssproperty [--plvylist-color-accent=#2277cc] - Accent color for form elements.
+ * @cssproperty [--plvylist-color-button-active=--plvylist-color-accent] - Color for buttons when hovered.
+ * @cssproperty [--plvylist-color-button-border=transparent] - Border color for button controls.
+ * @cssproperty [--plvylist-color-button-stroke=currentColor] - Stroke color for button controls.
+ * @cssproperty [--plvylist-color-active=#ee0011] - Color to use for changed button states (currently only the loop button).
+ * @cssproperty [--plvylist-action-button-background=currentColor] - Background color for the action button.
+ * @cssproperty [--plvylist-action-button-stroke=canvas] - Stroke color for the action button.
+ * @cssproperty [--plvylist-tracklist-font-size=unset] - Font size for the track list.
  *
  * @example
  * ```html
@@ -70,6 +124,25 @@ export default class Plvylist extends HTMLElement {
 
     this.hasArtists = undefined;
     this.hasAlbums = undefined;
+
+    // Bind internal functions
+    this.previousTrack = this.previousTrack.bind(this);
+    this.nextTrack = this.nextTrack.bind(this);
+    this.loadDuration = this.loadDuration.bind(this);
+    this.loadCurrentTime = this.loadCurrentTime.bind(this);
+    this.setVolumeIcon = this.setVolumeIcon.bind(this);
+    this.toggleVolume = this.toggleVolume.bind(this);
+    this.toggleLoop = this.toggleLoop.bind(this);
+    this.shuffleTracks = this.shuffleTracks.bind(this);
+    this.addActiveTrackClass = this.addActiveTrackClass.bind(this);
+    this.handleActionClick = this.handleActionClick.bind(this);
+    this.handleAudioEmptied = this.handleAudioEmptied.bind(this);
+    this.handleAudioEnded = this.handleAudioEnded.bind(this);
+    this.handleSeekerChange = this.handleSeekerChange.bind(this);
+    this.handleSeekerInput = this.handleSeekerInput.bind(this);
+    this.handleShuffle = this.handleShuffle.bind(this);
+    this.handleTimeUpdate = this.handleTimeUpdate.bind(this);
+    this.handleVolumeInput = this.handleVolumeInput.bind(this);
 
     /** All icons. */
     this.icons = {
@@ -392,82 +465,26 @@ export default class Plvylist extends HTMLElement {
   }
 
   /**
-   * Creates a button element with the chosen SVG icon.
-   * @param id ID of the element.
-   * @param icon Type of icon to use from the library.
-   * @param type Icon could be "large" or default size.
-   * @returns {HTMLButtonElement}
-   */
-  createIcon = (id, icon, type = "", classes = ["controlButton"]) => {
-    const button = document.createElement("button");
-    button.id = id;
-    button.classList.add(...classes);
-
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("viewBox", "0 0 24 24");
-    svg.setAttribute("stroke-width", "1.5");
-    svg.setAttribute("stroke-linecap", "round");
-    svg.setAttribute("stroke-linejoin", "round");
-    svg.setAttribute("fill", "none");
-
-    switch (type) {
-      case "large":
-        svg.setAttribute("width", "44");
-        svg.setAttribute("height", "44");
-        break;
-      default:
-        svg.setAttribute("width", "24");
-        svg.setAttribute("height", "24");
-        break;
-    }
-
-    svg.innerHTML = icon;
-    button.appendChild(svg);
-
-    return button;
-  };
-
-  /**
-   * Creates a range input for sliders.
-   * @param id ID of the element.
-   * @param options Any additional attributes and their values to apply.
-   * @returns {HTMLInputElement}
-   */
-  createSlider = (id, options = {}) => {
-    const input = document.createElement("input");
-    input.id = id;
-    input.type = "range";
-
-    for (const option in options) {
-      input.setAttribute(option, options[option]);
-    }
-
-    return input;
-  };
-
-  /**
    * Render the primary control bar by creating each button element and appending them to the container.
    * @see createIcon
    */
-  renderPrimaryControls = () => {
+  renderPrimaryControls() {
     if (this.controlsPrimaryContainer) {
-      this.controlsPrimaryContainer.appendChild(this.createIcon("shuffle", this.icons.shuffle));
-      this.controlsPrimaryContainer.appendChild(this.createIcon("previous", this.icons.previous));
-      this.controlsPrimaryContainer.appendChild(
-        this.createIcon("action", this.icons.play, "large")
-      );
-      this.controlsPrimaryContainer.appendChild(this.createIcon("next", this.icons.next));
-      this.controlsPrimaryContainer.appendChild(this.createIcon("loop", this.icons.loop));
+      this.controlsPrimaryContainer.appendChild(createIcon("shuffle", this.icons.shuffle));
+      this.controlsPrimaryContainer.appendChild(createIcon("previous", this.icons.previous));
+      this.controlsPrimaryContainer.appendChild(createIcon("action", this.icons.play, "large"));
+      this.controlsPrimaryContainer.appendChild(createIcon("next", this.icons.next));
+      this.controlsPrimaryContainer.appendChild(createIcon("loop", this.icons.loop));
     }
-  };
+  }
 
   /**
    * Render the track seeker by creating the input element and appending it to the container.
    * @see createSlider
    */
-  renderSeekerBar = () => {
+  renderSeekerBar() {
     if (this.seekerContainer) {
-      const bar = this.createSlider("seeker", {
+      const bar = createSlider("seeker", {
         "min": "0",
         "step": "0.01",
         "value": "0",
@@ -476,16 +493,16 @@ export default class Plvylist extends HTMLElement {
 
       this.seekerContainer.appendChild(bar);
     }
-  };
+  }
 
   /**
    * Render the volume bar by creating the input and associated button and appending them to the container.
    * @see createIcon
    */
-  renderVolumeBar = () => {
+  renderVolumeBar() {
     if (this.volumeContainer) {
-      const button = this.createIcon("volumeButton", this.icons.volumeMid);
-      const bar = this.createSlider("volume", {
+      const button = createIcon("volumeButton", this.icons.volumeMid);
+      const bar = createSlider("volume", {
         "min": "0",
         "max": "1",
         "step": "0.01",
@@ -495,7 +512,7 @@ export default class Plvylist extends HTMLElement {
       this.volumeContainer.appendChild(button);
       this.volumeContainer.appendChild(bar);
     }
-  };
+  }
 
   /**
    * Render the track list by creating new list items and setting the resulting string as the inner HTML of the container.
@@ -506,7 +523,7 @@ export default class Plvylist extends HTMLElement {
    *
    * @param {boolean} shuffled Whether or not we're getting tracks from a shuffled list or from the file.
    */
-  renderTrackList = async (shuffled = false) => {
+  async renderTrackList(shuffled = false) {
     try {
       if (!shuffled) {
         // Ignore VS Code saying await has no effect here.
@@ -579,7 +596,7 @@ export default class Plvylist extends HTMLElement {
     } catch (error) {
       console.error(error);
     }
-  };
+  }
 
   /**
    * Query for an element within the shadow root.
@@ -840,23 +857,23 @@ export default class Plvylist extends HTMLElement {
    * Check if the current track index is undefined.
    * @returns {boolean} If the currentTrackIndex is undefined.
    */
-  currentTrackIsUndefined = () => {
+  currentTrackIsUndefined() {
     return this.currentTrackIndex === undefined;
-  };
+  }
 
   /** Set default or custom settings from the API. */
-  applySettings = () => {
+  applySettings() {
     this.volume.value = this.startingVolume;
     this.audio.volume = this.startingVolume;
     this.seeker.value = this.startingTime;
     this.audio.currentTime = this.startingTime;
-  };
+  }
 
   /**
    * Load a given track by its indexed position in the tracks.
    * @param {number} index Valid index as number for the tracks array.
    */
-  loadTrack = (index) => {
+  loadTrack(index) {
     this.currentTrackIndex = index;
 
     // Reset inputs
@@ -871,10 +888,10 @@ export default class Plvylist extends HTMLElement {
     this.artwork.src = this.trackAlbumArt || this.placeholder;
 
     this.loadCurrentTime();
-  };
+  }
 
   /** Play or pause a track and set respective properties. */
-  playOrPause = (type = "play") => {
+  playOrPause(type = "play") {
     if (type === "play") {
       this.audio.play();
       this.actionSvg.innerHTML = this.icons.pause;
@@ -886,10 +903,10 @@ export default class Plvylist extends HTMLElement {
     }
 
     this.audioOverride = !this.audioOverride;
-  };
+  }
 
   /** Changes selection to the previous track. */
-  previousTrack = () => {
+  previousTrack() {
     const track = this.currentTrackIndex - 1;
     if (this.currentTrackIsUndefined()) {
       return false;
@@ -905,10 +922,10 @@ export default class Plvylist extends HTMLElement {
       this.loadTrack(this.currentTrackIndex);
       this.audioOverride = false;
     }
-  };
+  }
 
   /** Changes selection to the next track. */
-  nextTrack = () => {
+  nextTrack() {
     const track = this.currentTrackIndex + 1;
     if (this.currentTrackIsUndefined()) {
       this.loadTrack(0);
@@ -924,14 +941,14 @@ export default class Plvylist extends HTMLElement {
       this.loadTrack(0);
       this.audioOverride = false;
     }
-  };
+  }
 
   /**
    * Turn a number into a string with minutes and seconds.
    * @param {number} time Number to turn into a time string.
    * @returns {string} minutes:seconds
    */
-  timeToString = (time = this.audio.currentTime) => {
+  timeToString(time = this.audio.currentTime) {
     const minutes = Math.floor(time / 60)
       .toString()
       .padStart(2, "0");
@@ -940,24 +957,24 @@ export default class Plvylist extends HTMLElement {
       .padStart(2, "0");
 
     return `${minutes}:${seconds}`;
-  };
+  }
 
   /** Loads the current track's duration from metadata and displays it. */
-  loadDuration = () => {
+  loadDuration() {
     this.duration.innerHTML = this.timeToString(this.audio.duration);
-  };
+  }
 
   /** Loads the current track's play progress from metadata and displays it. */
-  loadCurrentTime = (time = this.audio.currentTime) => {
+  loadCurrentTime() {
     if (!this.audio.src) {
       return false; // Don't do anything if there's no audio source
     }
 
     this.current.innerHTML = this.timeToString();
-  };
+  }
 
   /** Changes the icon in the volume button based on the current volume level. */
-  setVolumeIcon = () => {
+  setVolumeIcon() {
     if (this.audio.volume === 0 || this.audio.muted) {
       this.volumeButtonSvg.innerHTML = this.icons.volumeOff;
     } else if (this.audio.volume <= 0.45) {
@@ -965,10 +982,10 @@ export default class Plvylist extends HTMLElement {
     } else {
       this.volumeButtonSvg.innerHTML = this.icons.volumeMid;
     }
-  };
+  }
 
   /** Mutes or unmutes the track based on muted state. */
-  toggleVolume = () => {
+  toggleVolume() {
     if (!this.audio.muted) {
       this.audio.muted = !this.audio.muted;
       this.volumeButtonSvg.innerHTML = this.icons.volumeOff;
@@ -978,19 +995,19 @@ export default class Plvylist extends HTMLElement {
       this.setVolumeIcon();
       this.volume.value = this.audio.volume;
     }
-  };
+  }
 
   /** Sets the track to loop or not based on loop state. */
-  toggleLoop = () => {
+  toggleLoop() {
     this.audio.loop = !this.audio.loop;
     this.loop.classList.toggle("button--active");
-  };
+  }
 
   /**
    * Shuffles the track list.
    * @returns {Array<Record<string, string>} New track list.
    */
-  shuffleTracks = () => {
+  shuffleTracks() {
     let tracks = this.tracks; // Original track list
 
     // Randomize the order
@@ -1004,15 +1021,15 @@ export default class Plvylist extends HTMLElement {
     this.tracks = tracks; // Store new order in class property
 
     return tracks;
-  };
+  }
 
   /** Add a class to the active song. */
-  addActiveTrackClass = () => {
+  addActiveTrackClass() {
     this.queryShadowRoot(`[data-track="${this.currentTrackIndex}"]`).classList.add("song--active");
-  };
+  }
 
   /** Run on audio end. */
-  handleAudioEnded = () => {
+  handleAudioEnded() {
     if (!this.audio.loop) {
       if (this.currentTrackIndex === this.trackCount - 1) {
         this.nextTrack();
@@ -1021,33 +1038,33 @@ export default class Plvylist extends HTMLElement {
         this.audio.play();
       }
     }
-  };
+  }
 
   /** Update the seeker value as the track progresses. */
-  handleTimeUpdate = () => {
+  handleTimeUpdate() {
     this.seeker.value = `${parseInt((this.audio.currentTime / this.audio.duration) * 100, 10)}`;
     this.loadCurrentTime();
-  };
+  }
 
   /** Run on audio empty.  */
-  handleAudioEmptied = () => {
+  handleAudioEmptied() {
     const activeSong = this.queryShadowRoot(".song--active");
 
     if (activeSong) activeSong.classList.remove("song--active");
-  };
+  }
 
   /** Run when the seeker emits change. */
-  handleSeekerChange = () => {
+  handleSeekerChange() {
     if (this.currentTrackIsUndefined()) {
       return false;
     } else {
       this.audio.currentTime = (this.seeker.value * this.audio.duration) / 100;
       this.audioOverride ? this.audio.play() : false;
     }
-  };
+  }
 
   /** Run when seeker emits input. */
-  handleSeekerInput = (event) => {
+  handleSeekerInput(event) {
     if (this.currentTrackIsUndefined()) {
       return false;
     } else {
@@ -1055,10 +1072,10 @@ export default class Plvylist extends HTMLElement {
       const newTime = (event.target.value * this.audio.duration) / 100;
       this.loadCurrentTime(newTime);
     }
-  };
+  }
 
   /** Run when pressing the primary action button. */
-  handleActionClick = () => {
+  handleActionClick() {
     if (this.currentTrackIsUndefined()) {
       this.loadTrack(0);
       this.playOrPause("play");
@@ -1067,10 +1084,10 @@ export default class Plvylist extends HTMLElement {
     } else {
       this.playOrPause("pause");
     }
-  };
+  }
 
   /** Run on shuffle click. */
-  handleShuffle = () => {
+  handleShuffle() {
     window.alert("This will stop your current track and start you over fresh, okay?");
 
     this.renderTrackList(true);
@@ -1081,12 +1098,12 @@ export default class Plvylist extends HTMLElement {
     } else {
       this.loadTrack(0);
     }
-  };
+  }
 
   /** Run when volume bar emits input. */
-  handleVolumeInput = () => {
+  handleVolumeInput() {
     this.audio.volume = this.volume.value;
-  };
+  }
 
   /** Add event listeners to all relevant elements. */
   addAllEventListeners() {

@@ -33,12 +33,16 @@
   },
   "homepage": "https://github.com/troyvassalotti/plvylist#readme",
   "devDependencies": {
+    "api-viewer-element": "^1.0.0-pre.7",
     "cem-plugin-async-function": "^0.0.5",
+    "cem-plugin-jet-brains-ide-integration": "^1.0.0-beta.0",
     "cem-plugin-jsdoc-example": "^0.0.9",
+    "cem-plugin-vs-code-custom-data-generator": "^1.4.0",
     "common-tags": "^1.8.2",
     "npm-run-all": "^4.1.5",
     "prettier": "^2.5.1",
     "vite": "^4.0.4",
     "vite-plugin-cem": "^0.4.0"
-  }
+  },
+  "web-types": "dist/web-types.json"
 }
