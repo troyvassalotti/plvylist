@@ -911,6 +911,7 @@ export default class Plvylist extends HTMLElement {
     this.artwork.src = this.trackAlbumArt || this.placeholder;
 
     this.loadCurrentTime();
+    this.updateMediaSessionMetadata();
   }
 
   /** Play or pause a track and set respective properties. */
