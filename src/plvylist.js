@@ -92,6 +92,8 @@ function createIcon(id, icon, type = "", classes = ["controlButton"]) {
  * @attribute {string} placeholder - Path to image file to replace the default placeholder image of albums.
  * @attribute {string} starting-volume - Number between 0 and 1 to set the volume at.
  * @attribute {string} starting-time - Some number (format unsure) if you want to change the initial starting time of component. Through testing, I don't really know how this works aside from knowing it's an option I've given you.
+ * @attribute {string} skip-forward-time - Number of seconds to skip forward when using the device's MediaSession.
+ * @attribute {string} skip-backward-time - Number of seconds to skip backward when using the device's MediaSession.
  *
  * @cssproperty [--plvylist-color-accent=#2277cc] - Accent color for form elements.
  * @cssproperty [--plvylist-color-button-active=--plvylist-color-accent] - Color for buttons when hovered.
@@ -118,6 +120,8 @@ export default class Plvylist extends HTMLElement {
 
     this.startingVolume = 0.5;
     this.startingTime = 0;
+    this.skipForwardTime = 30;
+    this.skipBackwardTime = 10;
 
     this.audioOverride = false; // Helps manage when tracks should be started or paused during selection.
     this.currentTrackIndex = undefined;
@@ -140,9 +144,12 @@ export default class Plvylist extends HTMLElement {
     this.handleAudioEnded = this.handleAudioEnded.bind(this);
     this.handleSeekerChange = this.handleSeekerChange.bind(this);
     this.handleSeekerInput = this.handleSeekerInput.bind(this);
+    this.handleMediaSessionSeek = this.handleMediaSessionSeek.bind(this);
     this.handleShuffle = this.handleShuffle.bind(this);
     this.handleTimeUpdate = this.handleTimeUpdate.bind(this);
     this.handleVolumeInput = this.handleVolumeInput.bind(this);
+    this.addMediaSessionActionHandlers = this.addMediaSessionActionHandlers.bind(this);
+    this.updateMediaSessionMetadata = this.updateMediaSessionMetadata.bind(this);
 
     /** All icons. */
     this.icons = {
@@ -175,11 +182,27 @@ export default class Plvylist extends HTMLElement {
           d="M15 8a5 5 0 0 1 0 8" /><path d="M17.7 5a9 9 0 0 1 0 14" /><path
           d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5" />`,
     };
+
+    this.actionHandlers = [
+      ["play", this.handleActionClick],
+      ["pause", this.handleActionClick],
+      ["previoustrack", this.previousTrack],
+      ["nexttrack", this.nextTrack],
+      ["seekforward", this.handleMediaSessionSeek],
+      ["seekbackward", this.handleMediaSessionSeek],
+    ];
   }
 
   // Component API
   static get observedAttributes() {
-    return ["file", "placeholder", "starting-volume", "starting-time"];
+    return [
+      "file",
+      "placeholder",
+      "starting-volume",
+      "starting-time",
+      "skip-forward-time",
+      "skip-backward-time",
+    ];
   }
 
   // Changes based on API
@@ -895,13 +918,16 @@ export default class Plvylist extends HTMLElement {
     if (type === "play") {
       this.audio.play();
       this.actionSvg.innerHTML = this.icons.pause;
+      navigator.mediaSession.playbackState = "playing";
     }
 
     if (type === "pause") {
       this.audio.pause();
       this.actionSvg.innerHTML = this.icons.play;
+      navigator.mediaSession.playbackState = "paused";
     }
 
+    this.updateMediaSessionMetadata();
     this.audioOverride = !this.audioOverride;
   }
 
@@ -922,6 +948,8 @@ export default class Plvylist extends HTMLElement {
       this.loadTrack(this.currentTrackIndex);
       this.audioOverride = false;
     }
+
+    this.updateMediaSessionMetadata();
   }
 
   /** Changes selection to the next track. */
@@ -941,6 +969,8 @@ export default class Plvylist extends HTMLElement {
       this.loadTrack(0);
       this.audioOverride = false;
     }
+
+    this.updateMediaSessionMetadata();
   }
 
   /**
@@ -1074,6 +1104,22 @@ export default class Plvylist extends HTMLElement {
     }
   }
 
+  /** Specific methods ran when using the device's MediaSession controller. */
+  handleMediaSessionSeek(details) {
+    switch (details.action) {
+      case "seekforward":
+        const newTime = Math.min(
+          this.audio.currentTime + this.skipForwardTime,
+          this.audio.duration
+        );
+        this.audio.currentTime = newTime;
+        break;
+      case "seekbackward":
+        this.audio.currentTime = Math.max(this.audio.currentTime - this.skipBackwardTime, 0);
+        break;
+    }
+  }
+
   /** Run when pressing the primary action button. */
   handleActionClick() {
     if (this.currentTrackIsUndefined()) {
@@ -1084,6 +1130,14 @@ export default class Plvylist extends HTMLElement {
     } else {
       this.playOrPause("pause");
     }
+  }
+
+  /** Update the metadata of the media session. */
+  updateMediaSessionMetadata() {
+    navigator.mediaSession.metadata.title = this.trackTitle;
+    navigator.mediaSession.metadata.artist = this.trackArtist;
+    navigator.mediaSession.metadata.album = this.trackAlbum;
+    navigator.mediaSession.metadata.artwork = [{ src: this.trackAlbumArt }];
   }
 
   /** Run on shuffle click. */
@@ -1124,6 +1178,17 @@ export default class Plvylist extends HTMLElement {
     this.volume.addEventListener("input", this.handleVolumeInput, false);
   }
 
+  /** Apply all action handlers for the MediaSession API. */
+  addMediaSessionActionHandlers() {
+    for (const [action, handler] of this.actionHandlers) {
+      try {
+        navigator.mediaSession.setActionHandler(action, handler);
+      } catch (error) {
+        console.log(`The media session action "${action}" is not supported yet.`);
+      }
+    }
+  }
+
   connectedCallback() {
     this.renderTemplate(this.shadowRoot);
     this.renderPrimaryControls();
@@ -1132,6 +1197,9 @@ export default class Plvylist extends HTMLElement {
     this.applySettings();
     this.renderTrackList();
     this.addAllEventListeners();
+    this.addMediaSessionActionHandlers();
+
+    navigator.mediaSession.metadata = new MediaMetadata(null);
   }
 }
 
