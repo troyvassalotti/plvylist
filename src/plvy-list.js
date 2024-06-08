@@ -1,8 +1,17 @@
 import { LitElement, html, css } from "lit";
 import { Task } from "@lit/task";
 import placeholderArtwork from "./placeholder-artwork.svg";
+import { map } from "lit/directives/map.js";
 
 const EMPTY_METADATA = "--";
+
+/**
+ * Check if a given key exists in any object within an array of objects.
+ * @param {any[]} arr Array of objects.
+ * @param {string} key Key to look for in array of objects.
+ * @returns {Boolean}
+ */
+const checkForKeyInArray = (arr, key) => arr.some((obj) => Object.keys(obj).includes(key));
 
 /**
  * @tag plvy-list
@@ -52,8 +61,8 @@ export default class Plvylist extends LitElement {
     this.skipBackwardTime = 10;
     this.audioOverride = false; // Helps manage when tracks should be started or paused during selection.
     this.currentTrackIndex = undefined;
-    this.hasArtists = undefined;
-    this.hasAlbums = undefined;
+    this.hasArtists = false;
+    this.hasAlbums = false;
 
     this.icons = {
       play: html`<title>Play</title><path d="M7 4v16l13 -8z" />`,
@@ -292,7 +301,9 @@ export default class Plvylist extends LitElement {
         throw new Error(response.status);
       }
 
-      return response.json();
+      const data = await response.json();
+
+      return data?.tracks;
     },
     args: () => [this.file],
   });
@@ -317,70 +328,121 @@ export default class Plvylist extends LitElement {
     `;
   }
 
-  renderTrackList(shuffled = false) {}
+  renderTrackList() {
+    return html`
+      <table class="trackList__table">
+        <thead>
+          <th>Track</th>
+          ${this.hasArtists ? html`<th>Artist</th>` : html``}
+          ${this.hasAlbums ? html`<th>Album</th>` : html``}
+        </thead>
+        <tbody>
+          ${map(this.tracks, (track, index) => {
+            const artistHTML = html`<span class="track__trackArtist">${track.artist}</span>`;
+            const albumHTML = html`<span class="track__trackAlbum">${track.album}</span>`;
+
+            return html`<tr>
+              <td class="trackList__track" data-track="${index}">
+                <button class="track__trackTitleButton">
+                  <span class="track__trackTitle">${track.title}</span>
+                </button>
+              </td>
+              ${this.hasArtists && track.artist
+                ? html`<td>
+                    ${track.artistUrl
+                      ? html`<a class="track__trackArtistUrl" href="${track.artistUrl}"
+                          >${artistHTML}</a
+                        >`
+                      : html`${artistHTML}`}
+                  </td>`
+                : html``}
+              ${this.hasAlbums && track.album
+                ? html`<td>
+                    ${track.albumUrl
+                      ? html`<a class="track__trackAlbumUrl" href="${track.albumUrl}"
+                          >${albumHTML}</a
+                        >`
+                      : html`${albumHTML}`}
+                  </td>`
+                : html``}
+            </tr>`;
+          })}
+        </tbody>
+      </table>
+    `;
+  }
 
   render() {
     return this.dataTask.render({
       pending: () => html` <p id="plvylist-loading-message">Generating your Plvylist...</p>`,
-      complete: (data) => html`
-        <audio id="audio" .volume=${this.startingVolume} .currentTime=${this.startingTime}></audio>
-        <div class="meta">
-          <img
-            src="${this.placeholder}"
-            alt=""
-            id="artwork"
-            width="350"
-            height="350"
-            loading="lazy"
-            decoding="async" />
-          <div class="trackInfo">
-            <p class="trackInfo__track">${EMPTY_METADATA}</p>
-            <p class="trackInfo__artist">${EMPTY_METADATA}</p>
-            <p class="trackInfo__album">${EMPTY_METADATA}</p>
-            <p class="trackInfo__timer">
-              <span class="trackInfo__currentTime">${EMPTY_METADATA}</span> /
-              <span class="trackInfo__duration">${EMPTY_METADATA}</span>
-            </p>
-          </div>
-        </div>
-        <div class="controls">
-          <div class="sliders">
-            <div class="seekerContainer">
-              <input
-                type="range"
-                id="seeker"
-                min="0"
-                step="0.01"
-                .defaultValue=${this.startingTime}
-                aria-label="Seek through the track." />
-            </div>
-            <div class="volumeContainer">
-              ${Plvylist.createIconButton("volumeButton", this.icons.volumeMid)}
-              <input
-                type="range"
-                id="volume"
-                min="0"
-                max="1"
-                .defaultValue=${this.startingVolume}
-                step="0.01"
-                aria-label="Volume control." />
+      complete: (data) => {
+        this.tracks = data;
+        this.hasAlbums = checkForKeyInArray(this.tracks, "album");
+        this.hasArtists = checkForKeyInArray(this.tracks, "artist");
+
+        return html`
+          <audio
+            id="audio"
+            .volume=${this.startingVolume}
+            .currentTime=${this.startingTime}></audio>
+          <div class="meta">
+            <img
+              src="${this.placeholder}"
+              alt=""
+              id="artwork"
+              width="350"
+              height="350"
+              loading="lazy"
+              decoding="async" />
+            <div class="trackInfo">
+              <p class="trackInfo__track">${EMPTY_METADATA}</p>
+              <p class="trackInfo__artist">${EMPTY_METADATA}</p>
+              <p class="trackInfo__album">${EMPTY_METADATA}</p>
+              <p class="trackInfo__timer">
+                <span class="trackInfo__currentTime">${EMPTY_METADATA}</span> /
+                <span class="trackInfo__duration">${EMPTY_METADATA}</span>
+              </p>
             </div>
           </div>
-          <div class="buttons">
-            ${Plvylist.createIconButton("shuffle", this.icons.shuffle)}
-            ${Plvylist.createIconButton("previous", this.icons.previous)}
-            ${Plvylist.createIconButton("action", this.icons.play)}
-            ${Plvylist.createIconButton("next", this.icons.next)}
-            ${Plvylist.createIconButton("loop", this.icons.loop)}
+          <div class="controls">
+            <div class="sliders">
+              <div class="seekerContainer">
+                <input
+                  type="range"
+                  id="seeker"
+                  min="0"
+                  step="0.01"
+                  .defaultValue=${this.startingTime}
+                  aria-label="Seek through the track." />
+              </div>
+              <div class="volumeContainer">
+                ${Plvylist.createIconButton("volumeButton", this.icons.volumeMid)}
+                <input
+                  type="range"
+                  id="volume"
+                  min="0"
+                  max="1"
+                  .defaultValue=${this.startingVolume}
+                  step="0.01"
+                  aria-label="Volume control." />
+              </div>
+            </div>
+            <div class="buttons">
+              ${Plvylist.createIconButton("shuffle", this.icons.shuffle)}
+              ${Plvylist.createIconButton("previous", this.icons.previous)}
+              ${Plvylist.createIconButton("action", this.icons.play)}
+              ${Plvylist.createIconButton("next", this.icons.next)}
+              ${Plvylist.createIconButton("loop", this.icons.loop)}
+            </div>
           </div>
-        </div>
-        <div class="tracklist"><!-- dynamic content --></div>
-      `,
+          <div class="tracklist">${this.renderTrackList()}</div>
+        `;
+      },
       error: (e) => html`<p id="plvylist-error-message">Error: ${e}</p>`,
     });
   }
 }
 
-if (window.customElements.get(Plvylist.tagName)) {
+if (!window.customElements.get(Plvylist.tagName)) {
   window.customElements.define(Plvylist.tagName, Plvylist);
 }
