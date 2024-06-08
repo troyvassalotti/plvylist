@@ -24,27 +24,26 @@
     "vite::build": "vite build",
     "vite::docs": "vite build --mode docs",
     "preview::docs": "vite --mode docs",
-    "build": "npm-run-all prettier::format vite::build",
+    "prebuild": "prettier::format",
+    "build": "vite::build",
     "prettier::lint": "prettier --check .",
     "prettier::format": "prettier --write ."
   },
-  "author": "Troy Vassalotti",
+  "author": "Troy Vassalotti (https://www.troyv.dev/)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/troyvassalotti/plvylist/issues"
   },
   "homepage": "https://github.com/troyvassalotti/plvylist#readme",
+  "dependencies": {
+    "@lit/task": "^1.0.1",
+    "lit": "^3.1.4"
+  },
   "devDependencies": {
     "api-viewer-element": "^1.0.0-pre.7",
-    "cem-plugin-async-function": "^0.0.5",
-    "cem-plugin-jet-brains-ide-integration": "^1.0.0-beta.0",
-    "cem-plugin-jsdoc-example": "^0.0.9",
-    "cem-plugin-vs-code-custom-data-generator": "^1.4.0",
     "common-tags": "^1.8.2",
-    "npm-run-all": "^4.1.5",
     "prettier": "^2.5.1",
-    "vite": "^4.0.4",
-    "vite-plugin-cem": "^0.4.0"
+    "vite": "^4.0.4"
   },
   "customElements": "dist/custom-elements.json",
   "web-types": "dist/web-types.json"
