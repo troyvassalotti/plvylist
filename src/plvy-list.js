@@ -48,6 +48,15 @@ export default class Plvylist extends LitElement {
     startingTime: { type: Number, attribute: "starting-time" },
     skipForwardTime: { type: Number, attribute: "skip-forward-time" },
     skipBackwardTime: { type: Number, attribute: "skip-backward-time" },
+    tracks: { type: Array, state: true },
+    currentTrack: { type: Object, state: true },
+    currentTrackTime: { state: true },
+    currentTrackDuration: { state: true },
+    currentTrackAlbumAltText: { state: true },
+    currentTrackIndex: { state: true },
+    volumeIcon: { state: true },
+    isPlaying: { state: true, type: Boolean },
+    isLooping: { state: true, type: Boolean },
   };
 
   constructor() {
@@ -63,49 +72,23 @@ export default class Plvylist extends LitElement {
     this.currentTrackIndex = undefined;
     this.hasArtists = false;
     this.hasAlbums = false;
+    this.currentTrackTitle = EMPTY_METADATA;
+    this.currentTrackArtist = EMPTY_METADATA;
+    this.currentTrackAlbum = EMPTY_METADATA;
+    this.currentTrackTime = EMPTY_METADATA;
+    this.currentTrackDuration = EMPTY_METADATA;
+    this.currentTrackAlbumAltText = "";
+    this.volumeIcon = "#icon--volumeMid";
+    this.isLooping = false;
 
-    this.icons = {
-      play: html`<title>Play</title><path d="M7 4v16l13 -8z" />`,
-      pause: html` <title>Pause</title>
-        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-        <rect x="6" y="5" width="4" height="14" rx="1" />
-        <rect x="14" y="5" width="4" height="14" rx="1" />`,
-      previous: html`<title>Previous</title>
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-        <path d="M21 5v14l-8 -7z"></path>
-        <path d="M10 5v14l-8 -7z"></path>`,
-      next: html`<title>Next</title>
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-        <path d="M3 5v14l8-7z"></path>
-        <path d="M14 5v14l8-7z"></path>`,
-      shuffle: html`<title>Shuffle</title>
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-        <rect x="3" y="3" width="6" height="6" rx="1"></rect>
-        <rect x="15" y="15" width="6" height="6" rx="1"></rect>
-        <path d="M21 11v-3a2 2 0 0 0 -2 -2h-6l3 3m0 -6l-3 3"></path>
-        <path d="M3 13v3a2 2 0 0 0 2 2h6l-3 -3m0 6l3 -3"></path>`,
-      loop: html`<title>Loop</title>
-        <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-        <path d="M4 12v-3a3 3 0 0 1 3 -3h13m-3 -3l3 3l-3 3"></path>
-        <path d="M20 12v3a3 3 0 0 1 -3 3h-13m3 3l-3-3l3-3"></path>
-        <path d="M11 11l1 -1v4"></path>`,
-      volumeOff: html`<title>Volume</title>
-        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-        <path
-          d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5" />
-        <path d="M16 10l4 4m0 -4l-4 4" />`,
-      volumeLow: html`<title>Volume</title>
-        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-        <path d="M15 8a5 5 0 0 1 0 8" />
-        <path
-          d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5" />`,
-      volumeMid: html`<title>Volume</title>
-        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-        <path d="M15 8a5 5 0 0 1 0 8" />
-        <path d="M17.7 5a9 9 0 0 1 0 14" />
-        <path
-          d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5" />`,
-    };
+    this.actionHandlers = [
+      ["play", this.handleActionClick],
+      ["pause", this.handleActionClick],
+      ["previoustrack", this.previousTrack],
+      ["nexttrack", this.nextTrack],
+      ["seekforward", this.handleMediaSessionSeek],
+      ["seekbackward", this.handleMediaSessionSeek],
+    ];
   }
 
   static styles = css`
@@ -308,24 +291,324 @@ export default class Plvylist extends LitElement {
     args: () => [this.file],
   });
 
-  static createIconButton(id, icon, type) {
-    const size = type === "large" ? 44 : 24;
+  /** Apply all action handlers for the MediaSession API. */
+  addMediaSessionActionHandlers() {
+    for (const [action, handler] of this.actionHandlers) {
+      try {
+        navigator.mediaSession.setActionHandler(action, handler);
+      } catch (error) {
+        console.log(`The media session action "${action}" is not supported yet.`);
+      }
+    }
+  }
 
-    return html`
-      <button class="controlButton" id="${id}">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          fill="none"
-          width="${size}"
-          height="${size}">
-          ${icon}
-        </svg>
-      </button>
-    `;
+  connectedCallback() {
+    super.connectedCallback();
+    this.addMediaSessionActionHandlers();
+    navigator.mediaSession.metadata = new MediaMetadata(null);
+  }
+
+  handleTrackTitleClick(event) {
+    const { target } = event;
+    const index = target.dataset.index;
+
+    this.loadTrack(index);
+
+    if (this.currentTrackIndex === undefined) {
+      this.playOrPause("play");
+    } else if (!this.audio.paused) {
+      this.audio.play();
+    }
+  }
+
+  /**
+   * Query for an element within the shadow root.
+   * @param {string} query Query string.
+   * @param {boolean} all Whether to use querySelectorAll or querySelector.
+   * @returns {Element|Element[]} Queried element.
+   */
+  queryShadowRoot(query, all = false) {
+    if (all) {
+      return this.shadowRoot?.querySelectorAll(query);
+    }
+
+    return this.shadowRoot?.querySelector(query);
+  }
+
+  /**
+   * Audio element where tracks are played.
+   * @type {HTMLAudioElement}
+   */
+  get audio() {
+    return this.queryShadowRoot("audio#audio");
+  }
+
+  /**
+   * Seeker bar.
+   * @type {HTMLInputElement}
+   */
+  get seeker() {
+    return this.queryShadowRoot("#seeker");
+  }
+
+  /**
+   * Volume bar.
+   * @type {HTMLInputElement}
+   */
+  get volume() {
+    return this.queryShadowRoot("#volume");
+  }
+
+  /**
+   * Load a given track by its indexed position in the tracks.
+   * @param {number} index Valid index as number for the tracks array.
+   */
+  loadTrack(index) {
+    this.currentTrackIndex = index;
+    this.currentTrack = this.tracks[this.currentTrackIndex];
+
+    // Reset inputs
+    this.seeker.value = 0;
+    this.audio.currentTime = 0;
+
+    this.loadCurrentTime();
+    this.updateMediaSessionMetadata();
+  }
+
+  /** Changes selection to the previous track. */
+  previousTrack() {
+    const track = this.currentTrackIndex - 1;
+    if (this.currentTrackIndex === undefined) {
+      return false;
+    } else if (track > -1) {
+      this.loadTrack(index);
+
+      if (this.isPlaying) {
+        this.audio.play();
+      }
+    } else {
+      this.playOrPause("pause");
+      this.loadTrack(this.currentTrackIndex);
+      this.audioOverride = false;
+    }
+
+    this.updateMediaSessionMetadata();
+  }
+
+  /** Changes selection to the next track. */
+  nextTrack() {
+    const track = this.currentTrackIndex + 1;
+    if (this.currentTrackIndex === undefined) {
+      this.loadTrack(0);
+    } else if (track < this.trackCount) {
+      this.loadTrack(track);
+
+      if (this.isPlaying) {
+        this.audio.play();
+      }
+    } else {
+      this.playOrPause("pause");
+      this.loadTrack(0);
+      this.audioOverride = false;
+    }
+
+    this.updateMediaSessionMetadata();
+  }
+
+  /**
+   * Turn a number into a string with minutes and seconds.
+   * @param {number} time Number to turn into a time string.
+   * @returns {string} minutes:seconds
+   */
+  timeToString(time = this.audio.currentTime) {
+    const minutes = Math.floor(time / 60)
+      .toString()
+      .padStart(2, "0");
+    const seconds = Math.floor(time % 60)
+      .toString()
+      .padStart(2, "0");
+
+    return `${minutes}:${seconds}`;
+  }
+
+  /** Loads the current track's duration from metadata and displays it. */
+  loadDuration() {
+    this.currentTrackDuration = this.timeToString(this.audio.duration);
+  }
+
+  /** Loads the current track's play progress from metadata and displays it. */
+  loadCurrentTime() {
+    if (!this.audio.src) {
+      return false;
+    }
+
+    this.currentTrackTime = this.timeToString();
+  }
+
+  /** Play or pause a track and set respective properties. */
+  playOrPause(type = "play") {
+    if (type === "play") {
+      this.audio.play();
+      this.setPlayState();
+      navigator.mediaSession.playbackState = "playing";
+    }
+
+    if (type === "pause") {
+      this.audio.pause();
+      this.setPlayState();
+      navigator.mediaSession.playbackState = "paused";
+    }
+
+    this.updateMediaSessionMetadata();
+    this.audioOverride = !this.audioOverride;
+  }
+
+  /** Changes the icon in the volume button based on the current volume level. */
+  setVolumeIcon() {
+    if (this.audio.volume === 0 || this.audio.muted) {
+      this.volumeIcon = "#icon--volumeOff";
+    } else if (this.audio.volume <= 0.45) {
+      this.volumeIcon = "#icon--volumeLow";
+    } else {
+      this.volumeIcon = "#icon--volumeMid";
+    }
+  }
+
+  /** Mutes or unmutes the track based on muted state. */
+  toggleVolume() {
+    if (!this.audio.muted) {
+      this.audio.muted = !this.audio.muted;
+      this.volumeIcon = "#icon--volumeOff";
+      this.volume.value = 0;
+    } else {
+      this.audio.muted = !this.audio.muted;
+      this.setVolumeIcon();
+      this.volume.value = this.audio.volume;
+    }
+  }
+
+  /** Sets the track to loop or not based on loop state. */
+  toggleLoop() {
+    this.isLooping = !this.isLooping;
+  }
+
+  /**
+   * Shuffles the track list.
+   * @returns {Array<Record<string, string>} New track list.
+   */
+  shuffleTracks() {
+    let tracks = this.tracks; // Original track list
+
+    // Randomize the order
+    for (let i = tracks.length - 1; i > 0; i--) {
+      let j = Math.floor(Math.random() * (i + 1));
+      let tempTracks = tracks[i];
+      tracks[i] = tracks[j];
+      tracks[j] = tempTracks;
+    }
+
+    this.tracks = tracks; // Store new order in class property
+  }
+
+  /** Total number of tracks. */
+  get trackCount() {
+    return this.tracks?.length;
+  }
+
+  /** Run on audio end. */
+  handleAudioEnded() {
+    if (!this.isLooping) {
+      this.nextTrack();
+      if (this.currentTrackIndex !== this.trackCount - 1) {
+        this.audio.play();
+        this.setPlayState();
+      }
+    }
+  }
+
+  /** Update the seeker value as the track progresses. */
+  handleTimeUpdate() {
+    this.seeker.value = `${parseInt((this.audio.currentTime / this.audio.duration) * 100, 10)}`;
+    this.loadCurrentTime();
+  }
+
+  /** Run when the seeker emits change. */
+  handleSeekerChange() {
+    if (this.currentTrackIndex === undefined) {
+      return false;
+    } else {
+      this.audio.currentTime = (this.seeker.value * this.audio.duration) / 100;
+      this.audioOverride ? this.audio.play() : false;
+      this.setPlayState();
+    }
+  }
+
+  /** Run when seeker emits input. */
+  handleSeekerInput(event) {
+    if (this.currentTrackIndex === undefined) {
+      return false;
+    } else {
+      this.audio.pause();
+      this.setPlayState();
+      const newTime = (event.target.value * this.audio.duration) / 100;
+      this.loadCurrentTime(newTime);
+    }
+  }
+
+  /** Specific methods ran when using the device's MediaSession controller. */
+  handleMediaSessionSeek(details) {
+    switch (details.action) {
+      case "seekforward":
+        const newTime = Math.min(
+          this.audio.currentTime + this.skipForwardTime,
+          this.audio.duration
+        );
+        this.audio.currentTime = newTime;
+        break;
+      case "seekbackward":
+        this.audio.currentTime = Math.max(this.audio.currentTime - this.skipBackwardTime, 0);
+        break;
+    }
+  }
+
+  /** Run when pressing the primary action button. */
+  handleActionClick() {
+    if (this.currentTrackIndex === undefined) {
+      this.loadTrack(0);
+      this.playOrPause("play");
+    } else if (!this.isPlaying) {
+      this.playOrPause("play");
+    } else {
+      this.playOrPause("pause");
+    }
+  }
+
+  setPlayState() {
+    this.isPlaying = !this.audio.paused;
+  }
+
+  /** Run on shuffle click. */
+  handleShuffle() {
+    window.alert("This will stop your current track and start you over fresh, okay?");
+
+    this.shuffleTracks();
+    this.loadTrack(0);
+    if (this.isPlaying) {
+      this.audio.play();
+    }
+  }
+
+  /** Run when volume bar emits input. */
+  handleVolumeInput() {
+    this.audio.volume = this.volume.value;
+  }
+
+  /** Update the metadata of the media session. */
+  updateMediaSessionMetadata() {
+    navigator.mediaSession.metadata.title = this.currentTrack?.title;
+    navigator.mediaSession.metadata.artist = this.currentTrack?.artist;
+    navigator.mediaSession.metadata.album = this.currentTrack?.album;
+    navigator.mediaSession.metadata.artwork = [{ src: this.currentTrack?.artwork }];
   }
 
   renderTrackList() {
@@ -342,8 +625,13 @@ export default class Plvylist extends LitElement {
             const albumHTML = html`<span class="track__trackAlbum">${track.album}</span>`;
 
             return html`<tr>
-              <td class="trackList__track" data-track="${index}">
-                <button class="track__trackTitleButton">
+              <td
+                class="trackList__track ${index === this.currentTrackIndex ? "song--active" : ""}"
+                data-track="${index}">
+                <button
+                  class="track__trackTitleButton"
+                  data-index="${index}"
+                  @click=${this.handleTrackTitleClick}>
                   <span class="track__trackTitle">${track.title}</span>
                 </button>
               </td>
@@ -372,6 +660,137 @@ export default class Plvylist extends LitElement {
     `;
   }
 
+  static renderIconSprite() {
+    return html`
+      <div aria-hidden="true" hidden id="icon-sprite">
+        <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+          <symbol
+            xmlns="http://www.w3.org/2000/svg"
+            id="icon--play"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none">
+            <title>Play</title>
+            <path d="M7 4v16l13 -8z" />
+          </symbol>
+          <symbol
+            xmlns="http://www.w3.org/2000/svg"
+            id="icon--pause"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none">
+            <title>Pause</title>
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <rect x="6" y="5" width="4" height="14" rx="1" />
+            <rect x="14" y="5" width="4" height="14" rx="1" />
+          </symbol>
+          <symbol
+            xmlns="http://www.w3.org/2000/svg"
+            id="icon--previous"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none">
+            <title>Previous</title>
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <path d="M21 5v14l-8 -7z"></path>
+            <path d="M10 5v14l-8 -7z"></path>
+          </symbol>
+          <symbol
+            xmlns="http://www.w3.org/2000/svg"
+            id="icon--next"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none">
+            <title>Next</title>
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <path d="M3 5v14l8-7z"></path>
+            <path d="M14 5v14l8-7z"></path>
+          </symbol>
+          <symbol
+            xmlns="http://www.w3.org/2000/svg"
+            id="icon--shuffle"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none">
+            <title>Shuffle</title>
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <rect x="3" y="3" width="6" height="6" rx="1"></rect>
+            <rect x="15" y="15" width="6" height="6" rx="1"></rect>
+            <path d="M21 11v-3a2 2 0 0 0 -2 -2h-6l3 3m0 -6l-3 3"></path>
+            <path d="M3 13v3a2 2 0 0 0 2 2h6l-3 -3m0 6l3 -3"></path>
+          </symbol>
+          <symbol
+            xmlns="http://www.w3.org/2000/svg"
+            id="icon--loop"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none">
+            <title>Loop</title>
+            <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+            <path d="M4 12v-3a3 3 0 0 1 3 -3h13m-3 -3l3 3l-3 3"></path>
+            <path d="M20 12v3a3 3 0 0 1 -3 3h-13m3 3l-3-3l3-3"></path>
+            <path d="M11 11l1 -1v4"></path>
+          </symbol>
+          <symbol
+            xmlns="http://www.w3.org/2000/svg"
+            id="icon--volumeOff"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none">
+            <title>Volume</title>
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path
+              d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5" />
+            <path d="M16 10l4 4m0 -4l-4 4" />
+          </symbol>
+          <symbol
+            xmlns="http://www.w3.org/2000/svg"
+            id="icon--volumeLow"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none">
+            <title>Volume</title>
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M15 8a5 5 0 0 1 0 8" />
+            <path
+              d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5" />
+          </symbol>
+          <symbol
+            xmlns="http://www.w3.org/2000/svg"
+            id="icon--volumeMid"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            fill="none">
+            <title>Volume</title>
+            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+            <path d="M15 8a5 5 0 0 1 0 8" />
+            <path d="M17.7 5a9 9 0 0 1 0 14" />
+            <path
+              d="M6 15h-2a1 1 0 0 1 -1 -1v-4a1 1 0 0 1 1 -1h2l3.5 -4.5a.8 .8 0 0 1 1.5 .5v14a.8 .8 0 0 1 -1.5 .5l-3.5 -4.5" />
+          </symbol>
+        </svg>
+      </div>
+    `;
+  }
+
   render() {
     return this.dataTask.render({
       pending: () => html` <p id="plvylist-loading-message">Generating your Plvylist...</p>`,
@@ -381,26 +800,33 @@ export default class Plvylist extends LitElement {
         this.hasArtists = checkForKeyInArray(this.tracks, "artist");
 
         return html`
+          ${Plvylist.renderIconSprite()}
           <audio
             id="audio"
+            .loop=${this.isLooping}
+            src=${this.currentTrack?.file || ""}
             .volume=${this.startingVolume}
-            .currentTime=${this.startingTime}></audio>
+            .currentTime=${this.startingTime}
+            @loadedmetadata=${this.loadDuration}
+            @volumechange=${this.setVolumeIcon}
+            @ended=${this.handleAudioEnded}
+            @timeupdate=${this.handleTimeUpdate}></audio>
           <div class="meta">
             <img
-              src="${this.placeholder}"
-              alt=""
+              src="${this.currentTrack?.artwork || this.placeholder}"
+              alt="${this.currentTrack?.artwork ? "Album art for ${this.currentTrack?.album}" : ""}"
               id="artwork"
               width="350"
               height="350"
               loading="lazy"
               decoding="async" />
             <div class="trackInfo">
-              <p class="trackInfo__track">${EMPTY_METADATA}</p>
-              <p class="trackInfo__artist">${EMPTY_METADATA}</p>
-              <p class="trackInfo__album">${EMPTY_METADATA}</p>
+              <p class="trackInfo__track">${this.currentTrack?.title || EMPTY_METADATA}</p>
+              <p class="trackInfo__artist">${this.currentTrack?.artist || EMPTY_METADATA}</p>
+              <p class="trackInfo__album">${this.currentTrack?.album || EMPTY_METADATA}</p>
               <p class="trackInfo__timer">
-                <span class="trackInfo__currentTime">${EMPTY_METADATA}</span> /
-                <span class="trackInfo__duration">${EMPTY_METADATA}</span>
+                <span class="trackInfo__currentTime">${this.currentTrackTime}</span> /
+                <span class="trackInfo__duration">${this.currentTrackDuration}</span>
               </p>
             </div>
           </div>
@@ -413,10 +839,16 @@ export default class Plvylist extends LitElement {
                   min="0"
                   step="0.01"
                   .defaultValue=${this.startingTime}
-                  aria-label="Seek through the track." />
+                  aria-label="Seek through the track."
+                  @change=${this.handleSeekerChange}
+                  @input=${this.handleSeekerInput} />
               </div>
               <div class="volumeContainer">
-                ${Plvylist.createIconButton("volumeButton", this.icons.volumeMid)}
+                <button id="volumeButton" class="controlButton" @click=${this.toggleVolume}>
+                  <svg width="24" height="24">
+                    <use href="${this.volumeIcon}"></use>
+                  </svg>
+                </button>
                 <input
                   type="range"
                   id="volume"
@@ -424,15 +856,39 @@ export default class Plvylist extends LitElement {
                   max="1"
                   .defaultValue=${this.startingVolume}
                   step="0.01"
-                  aria-label="Volume control." />
+                  aria-label="Volume control."
+                  @input=${this.handleVolumeInput} />
               </div>
             </div>
             <div class="buttons">
-              ${Plvylist.createIconButton("shuffle", this.icons.shuffle)}
-              ${Plvylist.createIconButton("previous", this.icons.previous)}
-              ${Plvylist.createIconButton("action", this.icons.play)}
-              ${Plvylist.createIconButton("next", this.icons.next)}
-              ${Plvylist.createIconButton("loop", this.icons.loop)}
+              <button id="shuffle" class="controlButton" @click=${this.handleShuffle}>
+                <svg width="24" height="24">
+                  <use href="#icon--shuffle"></use>
+                </svg>
+              </button>
+              <button id="previous" class="controlButton" @click=${this.previousTrack}>
+                <svg width="24" height="24">
+                  <use href="#icon--previous"></use>
+                </svg>
+              </button>
+              <button id="action" class="controlButton" @click=${this.handleActionClick}>
+                <svg width="24" height="24">
+                  <use href="#icon--${!this.isPlaying ? "play" : "pause"}"></use>
+                </svg>
+              </button>
+              <button id="next" class="controlButton" @click=${this.nextTrack}>
+                <svg width="24" height="24">
+                  <use href="#icon--next"></use>
+                </svg>
+              </button>
+              <button
+                id="loop"
+                class="controlButton ${this.isLooping ? "button--active" : ""}"
+                @click=${this.toggleLoop}>
+                <svg width="24" height="24">
+                  <use href="#icon--loop"></use>
+                </svg>
+              </button>
             </div>
           </div>
           <div class="tracklist">${this.renderTrackList()}</div>
