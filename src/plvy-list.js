@@ -2,6 +2,7 @@ import { LitElement, html, css } from "lit";
 import { Task } from "@lit/task";
 import placeholderArtwork from "./placeholder-artwork.svg";
 import { map } from "lit/directives/map.js";
+import { ifDefined } from "lit/directives/if-defined.js";
 
 const EMPTY_METADATA = "--";
 
@@ -50,6 +51,10 @@ export default class Plvylist extends LitElement {
     skipBackwardTime: { type: Number, attribute: "skip-backward-time" },
     tracks: { type: Array, state: true },
     currentTrack: { type: Object, state: true },
+    currentTrackFile: { state: true },
+    currentTrackTitle: { state: true },
+    currentTrackArtist: { state: true },
+    currentTrackAlbum: { state: true },
     currentTrackTime: { state: true },
     currentTrackDuration: { state: true },
     currentTrackAlbumAltText: { state: true },
@@ -58,6 +63,43 @@ export default class Plvylist extends LitElement {
     isPlaying: { state: true, type: Boolean },
     isLooping: { state: true, type: Boolean },
   };
+
+  #currentTrackIndex = undefined;
+
+  get currentTrackIndex() {
+    return this.#currentTrackIndex;
+  }
+
+  set currentTrackIndex(value) {
+    this.#currentTrackIndex = value;
+    this.currentTrack = this.tracks[value];
+  }
+
+  #currentTrack = undefined;
+
+  get currentTrack() {
+    return this.#currentTrack;
+  }
+
+  set currentTrack(value) {
+    this.#currentTrack = value;
+    this.currentTrackFile = this.currentTrack?.file;
+
+    debugger;
+
+    if (this.currentTrack) {
+      this.currentTrackTitle = Plvylist.handleMetadata(this.currentTrack.title);
+      this.currentTrackArtist = Plvylist.handleMetadata(this.currentTrack.artist);
+      this.currentTrackAlbum = Plvylist.handleMetadata(this.currentTrack.album);
+
+      this.audio.play();
+      this.setPlayState();
+    }
+  }
+
+  static handleMetadata(value) {
+    return value ?? EMPTY_METADATA;
+  }
 
   constructor() {
     super();
@@ -278,6 +320,7 @@ export default class Plvylist extends LitElement {
 
   dataTask = new Task(this, {
     task: async ([source], { signal }) => {
+      console.log("fetching the tracks from track JSON");
       const response = await fetch(source, { signal });
 
       if (!response.ok) {
@@ -365,7 +408,6 @@ export default class Plvylist extends LitElement {
    */
   loadTrack(index) {
     this.currentTrackIndex = index;
-    this.currentTrack = this.tracks[this.currentTrackIndex];
 
     // Reset inputs
     this.seeker.value = 0;
@@ -575,7 +617,7 @@ export default class Plvylist extends LitElement {
   handleActionClick() {
     if (this.currentTrackIndex === undefined) {
       this.loadTrack(0);
-      this.playOrPause("play");
+      // this.playOrPause("play");
     } else if (!this.isPlaying) {
       this.playOrPause("play");
     } else {
@@ -803,8 +845,8 @@ export default class Plvylist extends LitElement {
           ${Plvylist.renderIconSprite()}
           <audio
             id="audio"
+            src=${ifDefined(this.currentTrackFile)}
             .loop=${this.isLooping}
-            src=${this.currentTrack?.file || ""}
             .volume=${this.startingVolume}
             .currentTime=${this.startingTime}
             @loadedmetadata=${this.loadDuration}
@@ -821,9 +863,9 @@ export default class Plvylist extends LitElement {
               loading="lazy"
               decoding="async" />
             <div class="trackInfo">
-              <p class="trackInfo__track">${this.currentTrack?.title || EMPTY_METADATA}</p>
-              <p class="trackInfo__artist">${this.currentTrack?.artist || EMPTY_METADATA}</p>
-              <p class="trackInfo__album">${this.currentTrack?.album || EMPTY_METADATA}</p>
+              <p class="trackInfo__track">${this.currentTrackTitle}</p>
+              <p class="trackInfo__artist">${this.currentTrackArtist}</p>
+              <p class="trackInfo__album">${this.currentTrackAlbum}</p>
               <p class="trackInfo__timer">
                 <span class="trackInfo__currentTime">${this.currentTrackTime}</span> /
                 <span class="trackInfo__duration">${this.currentTrackDuration}</span>
