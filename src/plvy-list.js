@@ -55,6 +55,7 @@ export default class Plvylist extends LitElement {
     currentTrackTitle: { state: true },
     currentTrackArtist: { state: true },
     currentTrackAlbum: { state: true },
+    currentTrackArtwork: { state: true },
     currentTrackTime: { state: true },
     currentTrackDuration: { state: true },
     currentTrackAlbumAltText: { state: true },
@@ -85,15 +86,13 @@ export default class Plvylist extends LitElement {
     this.#currentTrack = value;
     this.currentTrackFile = this.currentTrack?.file;
 
-    debugger;
-
     if (this.currentTrack) {
       this.currentTrackTitle = Plvylist.handleMetadata(this.currentTrack.title);
       this.currentTrackArtist = Plvylist.handleMetadata(this.currentTrack.artist);
       this.currentTrackAlbum = Plvylist.handleMetadata(this.currentTrack.album);
+      this.currentTrackArtwork = this.currentTrack.artwork;
 
-      this.audio.play();
-      this.setPlayState();
+      this.updateMediaSessionMetadata();
     }
   }
 
@@ -292,7 +291,7 @@ export default class Plvylist extends LitElement {
       content: counter(tracks) ".";
     }
 
-    .song--active button,
+    button.song--active,
     .track__trackTitleButton:hover {
       color: var(--plvylist-color-active, var(--active-color));
     }
@@ -318,9 +317,8 @@ export default class Plvylist extends LitElement {
     }
   `;
 
-  dataTask = new Task(this, {
+  fetchTracks = new Task(this, {
     task: async ([source], { signal }) => {
-      console.log("fetching the tracks from track JSON");
       const response = await fetch(source, { signal });
 
       if (!response.ok) {
@@ -354,14 +352,7 @@ export default class Plvylist extends LitElement {
   handleTrackTitleClick(event) {
     const { target } = event;
     const index = target.dataset.index;
-
     this.loadTrack(index);
-
-    if (this.currentTrackIndex === undefined) {
-      this.playOrPause("play");
-    } else if (!this.audio.paused) {
-      this.audio.play();
-    }
   }
 
   /**
@@ -409,12 +400,16 @@ export default class Plvylist extends LitElement {
   loadTrack(index) {
     this.currentTrackIndex = index;
 
+    const activeTrack = this.queryShadowRoot(".song--active");
+    activeTrack?.classList.remove("song--active");
+    const newActiveTrack = this.queryShadowRoot(`[data-index="${this.currentTrackIndex}"]`);
+    newActiveTrack?.classList.add("song--active");
+
     // Reset inputs
     this.seeker.value = 0;
     this.audio.currentTime = 0;
 
     this.loadCurrentTime();
-    this.updateMediaSessionMetadata();
   }
 
   /** Changes selection to the previous track. */
@@ -433,8 +428,6 @@ export default class Plvylist extends LitElement {
       this.loadTrack(this.currentTrackIndex);
       this.audioOverride = false;
     }
-
-    this.updateMediaSessionMetadata();
   }
 
   /** Changes selection to the next track. */
@@ -453,8 +446,6 @@ export default class Plvylist extends LitElement {
       this.loadTrack(0);
       this.audioOverride = false;
     }
-
-    this.updateMediaSessionMetadata();
   }
 
   /**
@@ -492,7 +483,6 @@ export default class Plvylist extends LitElement {
     if (type === "play") {
       this.audio.play();
       this.setPlayState();
-      navigator.mediaSession.playbackState = "playing";
     }
 
     if (type === "pause") {
@@ -501,7 +491,6 @@ export default class Plvylist extends LitElement {
       navigator.mediaSession.playbackState = "paused";
     }
 
-    this.updateMediaSessionMetadata();
     this.audioOverride = !this.audioOverride;
   }
 
@@ -617,12 +606,16 @@ export default class Plvylist extends LitElement {
   handleActionClick() {
     if (this.currentTrackIndex === undefined) {
       this.loadTrack(0);
-      // this.playOrPause("play");
-    } else if (!this.isPlaying) {
-      this.playOrPause("play");
-    } else {
-      this.playOrPause("pause");
+      return this;
     }
+
+    if (this.isPlaying) {
+      this.pause();
+    } else {
+      this.play();
+    }
+
+    return this;
   }
 
   setPlayState() {
@@ -647,10 +640,10 @@ export default class Plvylist extends LitElement {
 
   /** Update the metadata of the media session. */
   updateMediaSessionMetadata() {
-    navigator.mediaSession.metadata.title = this.currentTrack?.title;
-    navigator.mediaSession.metadata.artist = this.currentTrack?.artist;
-    navigator.mediaSession.metadata.album = this.currentTrack?.album;
-    navigator.mediaSession.metadata.artwork = [{ src: this.currentTrack?.artwork }];
+    navigator.mediaSession.metadata.title = this.currentTrack?.title ?? "";
+    navigator.mediaSession.metadata.artist = this.currentTrack?.artist ?? "";
+    navigator.mediaSession.metadata.album = this.currentTrack?.album ?? "";
+    navigator.mediaSession.metadata.artwork = [{ src: this.currentTrack?.artwork ?? "" }];
   }
 
   renderTrackList() {
@@ -667,14 +660,12 @@ export default class Plvylist extends LitElement {
             const albumHTML = html`<span class="track__trackAlbum">${track.album}</span>`;
 
             return html`<tr>
-              <td
-                class="trackList__track ${index === this.currentTrackIndex ? "song--active" : ""}"
-                data-track="${index}">
+              <td class="trackList__track">
                 <button
                   class="track__trackTitleButton"
                   data-index="${index}"
                   @click=${this.handleTrackTitleClick}>
-                  <span class="track__trackTitle">${track.title}</span>
+                  ${track.title}
                 </button>
               </td>
               ${this.hasArtists && track.artist
@@ -833,8 +824,30 @@ export default class Plvylist extends LitElement {
     `;
   }
 
+  handleAudioPlay() {
+    this.isPlaying = true;
+  }
+
+  handleAudioPause() {
+    this.isPlaying = false;
+  }
+
+  handleAudioCanPlay() {
+    this.play();
+  }
+
+  play() {
+    this.audio.play();
+    navigator.mediaSession.playbackState = "playing";
+  }
+
+  pause() {
+    this.audio.pause();
+    navigator.mediaSession.playbackState = "paused";
+  }
+
   render() {
-    return this.dataTask.render({
+    return this.fetchTracks.render({
       pending: () => html` <p id="plvylist-loading-message">Generating your Plvylist...</p>`,
       complete: (data) => {
         this.tracks = data;
@@ -849,14 +862,19 @@ export default class Plvylist extends LitElement {
             .loop=${this.isLooping}
             .volume=${this.startingVolume}
             .currentTime=${this.startingTime}
+            @play=${this.handleAudioPlay}
+            @pause=${this.handleAudioPause}
+            @canplay=${this.handleAudioCanPlay}
             @loadedmetadata=${this.loadDuration}
             @volumechange=${this.setVolumeIcon}
             @ended=${this.handleAudioEnded}
             @timeupdate=${this.handleTimeUpdate}></audio>
           <div class="meta">
             <img
-              src="${this.currentTrack?.artwork || this.placeholder}"
-              alt="${this.currentTrack?.artwork ? "Album art for ${this.currentTrack?.album}" : ""}"
+              src="${this.currentTrackArtwork || this.placeholder}"
+              alt="${this.currentTrackArtwork && this.currentTrackAlbum
+                ? "Album art for ${this.currentTrackAlbum}"
+                : ""}"
               id="artwork"
               width="350"
               height="350"
