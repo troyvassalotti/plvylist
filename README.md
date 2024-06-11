@@ -32,7 +32,3 @@ The only required HTML attribute for Plvylist to work is `file` which accepts a 
 ```
 
 **Each key aside from `file` is optional and will default to placeholders if they aren't provided.**
-
-## Notes
-
-Placeholder image attribution: https://www.svgrepo.com/svg/36360/compact-disc

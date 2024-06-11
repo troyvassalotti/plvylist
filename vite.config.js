@@ -1,9 +1,11 @@
 import { defineConfig } from "vite";
-// import VitePluginCustomElementsManifest from "vite-plugin-cem";
-// import { jsdocExamplePlugin } from "cem-plugin-jsdoc-example";
-// import { asyncFunctionPlugin } from "cem-plugin-async-function";
-// import { generateCustomData } from "cem-plugin-vs-code-custom-data-generator";
-// import { generateWebTypes } from "cem-plugin-jet-brains-ide-integration";
+import nunjucks from "vite-plugin-nunjucks";
+import readme from "./lib/parse-readme.js";
+import VitePluginCustomElementsManifest from "vite-plugin-cem";
+import { jsdocExamplePlugin } from "cem-plugin-jsdoc-example";
+import { asyncFunctionPlugin } from "cem-plugin-async-function";
+import { customElementVsCodePlugin } from "custom-element-vs-code-integration";
+import { customElementJetBrainsPlugin } from "custom-element-jet-brains-integration";
 
 const ideIntegrations = {
   outdir: "dist",
@@ -22,16 +24,25 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
 
   return {
     build: buildOptions,
-    // plugins: [
-    //   VitePluginCustomElementsManifest({
-    //     files: ["./src/plvylist.js"],
-    //     plugins: [
-    //       asyncFunctionPlugin(),
-    //       jsdocExamplePlugin(),
-    //       generateCustomData(ideIntegrations),
-    //       generateWebTypes(ideIntegrations),
-    //     ],
-    //   }),
-    // ],
+    plugins: [
+      nunjucks({
+        variables: {
+          "index.html": {
+            title: "Plvylist | Web Audio Component",
+            content: readme(),
+          },
+        },
+      }),
+
+      VitePluginCustomElementsManifest({
+        files: ["./src/plvylist.js"],
+        plugins: [
+          asyncFunctionPlugin(),
+          jsdocExamplePlugin(),
+          customElementVsCodePlugin(ideIntegrations),
+          customElementJetBrainsPlugin(ideIntegrations),
+        ],
+      }),
+    ],
   };
 });

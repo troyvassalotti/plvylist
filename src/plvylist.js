@@ -1,6 +1,6 @@
 import { LitElement, html, css } from "lit";
 import { Task } from "@lit/task";
-import placeholderArtwork from "./placeholder-artwork.svg";
+import placeholderArtwork from "./placeholder-artwork.svg"; // Placeholder image attribution: https://www.svgrepo.com/svg/36360/compact-disc
 import { map } from "lit/directives/map.js";
 import { ifDefined } from "lit/directives/if-defined.js";
 import { classMap } from "lit/directives/class-map.js";
@@ -15,7 +15,7 @@ const EMPTY_METADATA = "--";
 const checkForKeyInArray = (arr, key) => arr.some((obj) => Object.keys(obj).includes(key));
 
 /**
- * @tag plvy-list
+ * @element plvy-list
  * @summary A media player for playlists or other collections of audio.
  *
  * @attribute {string} file - Path to JSON file containing tracks.
