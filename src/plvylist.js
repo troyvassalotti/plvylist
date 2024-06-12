@@ -5,7 +5,7 @@ import { map } from "lit/directives/map.js";
 import { ifDefined } from "lit/directives/if-defined.js";
 import { classMap } from "lit/directives/class-map.js";
 
-const EMPTY_METADATA = "--";
+const emptyData = emptyData;
 
 /**
  * @param {any[]} arr Array of objects.
@@ -17,13 +17,6 @@ const checkForKeyInArray = (arr, key) => arr.some((obj) => Object.keys(obj).incl
 /**
  * @element plvy-list
  * @summary A media player for playlists or other collections of audio.
- *
- * @attribute {string} file - Path to JSON file containing tracks.
- * @attribute {string} placeholder - Path to image file to replace the default placeholder image of albums.
- * @attribute {string} starting-volume - Number between 0 and 1 to set the volume at.
- * @attribute {string} starting-time - Some number (format unsure) if you want to change the initial starting time of component. Through testing, I don't really know how this works aside from knowing it's an option I've given you.
- * @attribute {string} skip-forward-time - Number of seconds to skip forward when using the device's MediaSession.
- * @attribute {string} skip-backward-time - Number of seconds to skip backward when using the device's MediaSession.
  *
  * @cssproperty [--plvylist-color-accent=#2277cc] - Accent color for form elements.
  * @cssproperty [--plvylist-color-button-active=--plvylist-color-accent] - Color for buttons when hovered.
@@ -86,11 +79,11 @@ export default class Plvylist extends LitElement {
     this.skipForwardTime = 30;
     this.skipBackwardTime = 10;
     this.currentTrackIndex = undefined;
-    this.currentTrackTitle = EMPTY_METADATA;
-    this.currentTrackArtist = EMPTY_METADATA;
-    this.currentTrackAlbum = EMPTY_METADATA;
-    this.currentTrackTime = EMPTY_METADATA;
-    this.currentTrackDuration = EMPTY_METADATA;
+    this.currentTrackTitle = emptyData;
+    this.currentTrackArtist = emptyData;
+    this.currentTrackAlbum = emptyData;
+    this.currentTrackTime = emptyData;
+    this.currentTrackDuration = emptyData;
     this.currentTrackAlbumAltText = "";
     this.recentlyPlayedTrackIndex = undefined;
     this.volumeIcon = "#icon--volumeMid";
@@ -112,38 +105,50 @@ export default class Plvylist extends LitElement {
       ["seekbackward", this.handleMediaSessionSeek],
     ];
   }
-  static tagName = "plvy-list";
 
-  static properties = {
-    file: { type: String },
-    placeholder: { type: String },
-    startingVolume: { type: Number, attribute: "starting-volume" },
-    startingTime: { type: Number, attribute: "starting-time" },
-    skipForwardTime: { type: Number, attribute: "skip-forward-time" },
-    skipBackwardTime: { type: Number, attribute: "skip-backward-time" },
+  static get properties() {
+    return {
+      /** Path to JSON file containing tracks. */
+      file: { type: String },
 
-    tracks: { type: Array, state: true },
-    currentTrackIndex: { state: true, type: Number },
-    currentTrack: { type: Object, state: true },
-    currentTrackFile: { state: true },
-    currentTrackTitle: { state: true },
-    currentTrackArtist: { state: true },
-    currentTrackAlbum: { state: true },
-    currentTrackArtwork: { state: true },
-    currentTrackTime: { state: true },
-    currentTrackDuration: { state: true },
-    currentTrackAlbumAltText: { state: true },
-    recentlyPlayedTrackIndex: { state: true, type: Number },
-    volumeIcon: { state: true },
-    showPlayIcon: { state: true, type: Boolean },
-    hasPlayed: { state: true, type: Boolean },
-    isPlaying: { state: true, type: Boolean },
-    isSeeking: { state: true, type: Boolean },
-    isLooping: { state: true, type: Boolean },
-    pausedByEnding: { state: true, type: Boolean },
-    playedThrough: { state: true, type: Boolean },
-    forcePause: { state: true, type: Boolean },
-  };
+      /** Path to image file to replace the default placeholder image of albums. */
+      placeholder: { type: String },
+
+      /** Number between 0 and 1 to set the volume at. */
+      startingVolume: { type: Number, attribute: "starting-volume" },
+
+      /**  Some number (format unsure) if you want to change the initial starting time of component. Through testing, I don't really know how this works aside from knowing it's an option I've given you. */
+      startingTime: { type: Number, attribute: "starting-time" },
+
+      /** Number of seconds to skip forward when using the device's MediaSession. */
+      skipForwardTime: { type: Number, attribute: "skip-forward-time" },
+
+      /** Number of seconds to skip backward when using the device's MediaSession. */
+      skipBackwardTime: { type: Number, attribute: "skip-backward-time" },
+
+      tracks: { type: Array, state: true, attribute: false },
+      currentTrackIndex: { state: true, attribute: false, type: Number },
+      currentTrack: { type: Object, state: true, attribute: false },
+      currentTrackFile: { state: true, attribute: false, type: Object },
+      currentTrackTitle: { state: true, attribute: false, type: String },
+      currentTrackArtist: { state: true, attribute: false, type: String },
+      currentTrackAlbum: { state: true, attribute: false, type: String },
+      currentTrackArtwork: { state: true, attribute: false, type: String },
+      currentTrackTime: { state: true, attribute: false, type: String },
+      currentTrackDuration: { state: true, attribute: false, type: String },
+      currentTrackAlbumAltText: { state: true, attribute: false, type: String },
+      recentlyPlayedTrackIndex: { state: true, attribute: false, type: Number },
+      volumeIcon: { state: true, attribute: false, type: String },
+      showPlayIcon: { state: true, attribute: false, type: Boolean },
+      hasPlayed: { state: true, attribute: false, type: Boolean },
+      isPlaying: { state: true, attribute: false, type: Boolean },
+      isSeeking: { state: true, attribute: false, type: Boolean },
+      isLooping: { state: true, attribute: false, type: Boolean },
+      pausedByEnding: { state: true, attribute: false, type: Boolean },
+      playedThrough: { state: true, attribute: false, type: Boolean },
+      forcePause: { state: true, attribute: false, type: Boolean },
+    };
+  }
 
   static styles = css`
     :host {
@@ -341,7 +346,7 @@ export default class Plvylist extends LitElement {
   `;
 
   static handleMetadata(value) {
-    return value ?? EMPTY_METADATA;
+    return value ?? emptyData;
   }
 
   /**
@@ -468,7 +473,7 @@ export default class Plvylist extends LitElement {
 
       const data = await response.json();
 
-      return data?.tracks;
+      return data;
     },
     args: () => [this.file],
   });
@@ -1107,6 +1112,6 @@ export default class Plvylist extends LitElement {
   }
 }
 
-if (!window.customElements.get(Plvylist.tagName)) {
-  window.customElements.define(Plvylist.tagName, Plvylist);
+if (!window.customElements.get("plvy-list")) {
+  window.customElements.define("plvy-list", Plvylist);
 }

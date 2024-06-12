@@ -36,6 +36,7 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
 
       VitePluginCustomElementsManifest({
         files: ["./src/plvylist.js"],
+        lit: true,
         plugins: [
           asyncFunctionPlugin(),
           jsdocExamplePlugin(),
