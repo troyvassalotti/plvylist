@@ -7,13 +7,18 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
     <script type="module" src="/src/plvylist.js"></script>
     <script type="module" src="https://jspm.dev/@api-viewer/docs"></script>
+    <script type="module">
+      import tracks from "/tracks.js?url";
+
+      window.plvylist.data = tracks;
+    </script>
   </head>
   <body class="container">
     <main>
       <section>{{ content | safe }}</section>
       <section class="demo" id="demo">
         <h2>Demo</h2>
-        <plvy-list file="/tracks.json" starting-volume="0.7"></plvy-list>
+        <plvy-list id="plvylist" starting-volume="0.7"></plvy-list>
       </section>
       <section class="docs" id="docs">
         <header>

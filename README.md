@@ -13,7 +13,7 @@ Get Plvylist from one of the following ways:
 
 Import (if installed with npm) or add the script (if installed manually) to your page, then place the element `<plvy-list></plvy-list>` wherever you want it.
 
-The only required HTML attribute for Plvylist to work is `file` which accepts a path to a `.json` file describing your tracks: `file="path/to/tracks.json"`. The syntax for the file is as follows:
+The only required HTML attribute for Plvylist to work is either `file` which accepts a path to a `.json` file describing your tracks: `file="path/to/tracks.json"`, or `data` which is an array of tracks. The syntax for both is as follows:
 
 ```json
 [
