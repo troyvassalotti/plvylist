@@ -13,7 +13,7 @@ const emptyData = "--";
  * @param {string} key Key to look for in array of objects.
  * @returns {Boolean}
  */
-const checkForKeyInArray = (arr, key) => arr.some((obj) => Object.keys(obj).includes(key));
+const checkForKeyInArray = (arr, key) => arr?.some((obj) => Object.keys(obj).includes(key));
 
 /**
  * @element plvy-list
@@ -598,7 +598,7 @@ export default class Plvylist extends LitElement {
       case "seekforward":
         const newTime = Math.min(
           this.audio.currentTime + this.skipForwardTime,
-          this.audio.duration
+          this.audio.duration,
         );
         this.audio.currentTime = newTime;
         break;
