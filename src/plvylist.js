@@ -104,15 +104,6 @@ export default class Plvylist extends LitElement {
     this.pausedByEnding = false;
     this.forcePause = false;
     this.playedThrough = false;
-
-    this.actionHandlers = [
-      ["play", this.handleActionClick],
-      ["pause", this.handleActionClick],
-      ["previoustrack", this.loadPreviousTrack],
-      ["nexttrack", this.loadNextTrack],
-      ["seekforward", this.handleMediaSessionSeek],
-      ["seekbackward", this.handleMediaSessionSeek],
-    ];
   }
 
   static get properties() {
@@ -138,37 +129,80 @@ export default class Plvylist extends LitElement {
       /** Number of seconds to skip backward when using the device's MediaSession. */
       skipBackwardTime: { type: Number, attribute: "skip-backward-time" },
 
-      tracks: { type: Array, state: true, attribute: false },
+      /** @private */
+      tracks: { state: true, attribute: false, type: Array },
+
+      /** @private */
       currentTrackIndex: { state: true, attribute: false, type: Number },
-      currentTrack: { type: Object, state: true, attribute: false },
+
+      /** @private */
+      currentTrack: { state: true, attribute: false, type: Object },
+
+      /** @private */
       currentTrackFile: { state: true, attribute: false, type: Object },
+
+      /** @private */
       currentTrackTitle: { state: true, attribute: false, type: String },
+
+      /** @private */
       currentTrackArtist: { state: true, attribute: false, type: String },
+
+      /** @private */
       currentTrackAlbum: { state: true, attribute: false, type: String },
+
+      /** @private */
       currentTrackArtwork: { state: true, attribute: false, type: String },
+
+      /** @private */
       currentTrackTime: { state: true, attribute: false, type: String },
+
+      /** @private */
       currentTrackDuration: { state: true, attribute: false, type: String },
+
+      /** @private */
       currentTrackAlbumAltText: { state: true, attribute: false, type: String },
+
+      /** @private */
       recentlyPlayedTrackIndex: { state: true, attribute: false, type: Number },
+
+      /** @private */
       volumeIcon: { state: true, attribute: false, type: String },
+
+      /** @private */
       showPlayIcon: { state: true, attribute: false, type: Boolean },
+
+      /** @private */
       hasPlayed: { state: true, attribute: false, type: Boolean },
+
+      /** @private */
       isPlaying: { state: true, attribute: false, type: Boolean },
+
+      /** @private */
       isSeeking: { state: true, attribute: false, type: Boolean },
+
+      /** @private */
       isLooping: { state: true, attribute: false, type: Boolean },
+
+      /** @private */
       pausedByEnding: { state: true, attribute: false, type: Boolean },
+
+      /** @private */
       playedThrough: { state: true, attribute: false, type: Boolean },
+
+      /** @private */
       forcePause: { state: true, attribute: false, type: Boolean },
     };
   }
 
   static styles = [styles];
 
+  /** @private */
   static handleMetadata(value) {
     return value ?? emptyData;
   }
 
   /**
+   * @private
    * @param {number} time Number to turn into a time string.
    * @returns {string} minutes:seconds
    */
@@ -217,6 +251,7 @@ export default class Plvylist extends LitElement {
   }
 
   /**
+   * @private
    * @type {HTMLAudioElement}
    */
   get audio() {
@@ -224,6 +259,7 @@ export default class Plvylist extends LitElement {
   }
 
   /**
+   * @private
    * @type {HTMLInputElement}
    */
   get seeker() {
@@ -231,6 +267,7 @@ export default class Plvylist extends LitElement {
   }
 
   /**
+   * @private
    * @type {HTMLInputElement}
    */
   get volume() {
@@ -238,6 +275,7 @@ export default class Plvylist extends LitElement {
   }
 
   /**
+   * @private
    * @type {HTMLTableCellElement | undefined}
    */
   get activeTrackNode() {
@@ -245,12 +283,17 @@ export default class Plvylist extends LitElement {
   }
 
   /**
+   * @private
    * @type {HTMLTableCellElement | undefined}
    */
   get currentTrackIndexNode() {
     return this.queryShadowRoot(`[data-index="${this.currentTrackIndex}"]`);
   }
 
+  /**
+   * @private
+   * @type {number | undefined}
+   */
   get previousTrack() {
     const track = this.currentTrackIndex - 1;
 
@@ -262,6 +305,7 @@ export default class Plvylist extends LitElement {
   }
 
   /**
+   * @private
    * @type {number | undefined}
    */
   get nextTrack() {
@@ -274,14 +318,25 @@ export default class Plvylist extends LitElement {
     return track;
   }
 
+  /**
+   * @private
+   * @type {boolean}
+   */
   get playingLastTrack() {
     return this.currentTrackIndex === this.trackCount - 1;
   }
 
+  /**
+   * @private
+   * @type {number}
+   */
   get trackCount() {
     return this.tracks.length;
   }
 
+  /**
+   * @private
+   */
   fetchTracks = new Task(this, {
     task: async ([file, dataset], { signal }) => {
       if (!file && !dataset) throw new Error("No data is available.");
@@ -302,6 +357,7 @@ export default class Plvylist extends LitElement {
   });
 
   /**
+   * @private
    * @param {string} query Query string.
    * @param {boolean} all Whether to use querySelectorAll or querySelector.
    * @type {Element | NodeListOf<Element> | null | undefined}
@@ -315,6 +371,7 @@ export default class Plvylist extends LitElement {
   }
 
   /**
+   * @private
    * @param {number} index Valid index as number for the tracks array.
    */
   loadTrack(index) {
@@ -324,6 +381,7 @@ export default class Plvylist extends LitElement {
     this.loadCurrentTime();
   }
 
+  /** @private */
   resetInputs() {
     this.seeker.valueAsNumber = 0;
 
@@ -334,13 +392,24 @@ export default class Plvylist extends LitElement {
     }
   }
 
+  /** @private */
   updateActiveSong() {
     this.activeTrackNode?.classList.remove("song--active");
     this.currentTrackIndexNode?.classList.add("song--active");
   }
 
+  /** @private */
   addMediaSessionActionHandlers() {
-    for (const [action, handler] of this.actionHandlers) {
+    const actionHandlers = [
+      ["play", this.handleActionClick],
+      ["pause", this.handleActionClick],
+      ["previoustrack", this.loadPreviousTrack],
+      ["nexttrack", this.loadNextTrack],
+      ["seekforward", this.handleMediaSessionSeek],
+      ["seekbackward", this.handleMediaSessionSeek],
+    ];
+
+    for (const [action, handler] of actionHandlers) {
       try {
         navigator.mediaSession.setActionHandler(action, handler);
       } catch (error) {
@@ -349,6 +418,7 @@ export default class Plvylist extends LitElement {
     }
   }
 
+  /** @private */
   updateMediaSessionMetadata() {
     navigator.mediaSession.metadata.title = this.currentTrack?.title ?? "";
     navigator.mediaSession.metadata.artist = this.currentTrack?.artist ?? "";
@@ -356,6 +426,7 @@ export default class Plvylist extends LitElement {
     navigator.mediaSession.metadata.artwork = [{ src: this.currentTrack?.artwork ?? "" }];
   }
 
+  /** @private */
   loadPreviousTrack() {
     if (this.previousTrack >= 0) {
       this.loadTrack(this.previousTrack);
@@ -366,6 +437,7 @@ export default class Plvylist extends LitElement {
     return this;
   }
 
+  /** @private */
   loadNextTrack() {
     if (this.nextTrack >= 0) {
       this.loadTrack(this.nextTrack);
@@ -379,16 +451,19 @@ export default class Plvylist extends LitElement {
     return this;
   }
 
+  /** @private */
   handleLastTrackCondition() {
     this.playedThrough = true;
     this.showPlayIcon = true;
     this.isPlaying = false;
   }
 
+  /** @private */
   setRecentlyPlayedTrack(index) {
     this.recentlyPlayedTrackIndex = index;
   }
 
+  /** @private */
   loadCurrentTime(time = this.audio.currentTime) {
     this.currentTrackTime = Plvylist.timeToString(time);
   }
@@ -401,6 +476,7 @@ export default class Plvylist extends LitElement {
     this.audio.pause();
   }
 
+  /** @private */
   handleAudioPlay() {
     this.forcePause = false;
     this.pausedByEnding = false;
@@ -412,6 +488,7 @@ export default class Plvylist extends LitElement {
     if (!this.hasPlayed) this.hasPlayed = true;
   }
 
+  /** @private */
   handleAudioPause() {
     this.isPlaying = false;
     navigator.mediaSession.playbackState = "paused";
@@ -422,6 +499,7 @@ export default class Plvylist extends LitElement {
     }
   }
 
+  /** @private */
   handleAudioCanPlay() {
     if (!this.hasPlayed) {
       this.play();
@@ -438,17 +516,22 @@ export default class Plvylist extends LitElement {
     return this;
   }
 
+  /** @private */
   handleAudioVolumeChange() {
     this.setVolumeIcon();
   }
 
+  /** @private */
   handleAudioEmptied() {
     this.setRecentlyPlayedTrack(this.currentTrackIndex);
   }
+
+  /** @private */
   handleAudioLoadedMetadata() {
     this.currentTrackDuration = Plvylist.timeToString(this.audio.duration);
   }
 
+  /** @private */
   handleAudioEnded() {
     this.pausedByEnding = true;
 
@@ -459,6 +542,7 @@ export default class Plvylist extends LitElement {
     }
   }
 
+  /** @private */
   handleAudioTimeUpdate() {
     if (!this.isSeeking) {
       const time = (this.audio.currentTime / this.audio.duration) * 100;
@@ -467,21 +551,25 @@ export default class Plvylist extends LitElement {
     }
   }
 
+  /** @private */
   handleSeekerChange() {
     this.isSeeking = false;
     this.audio.currentTime = (this.seeker.value * this.audio.duration) / 100;
   }
 
+  /** @private */
   handleSeekerInput(event) {
     this.isSeeking = true;
     const newTime = (event.target.value * this.audio.duration) / 100;
     this.loadCurrentTime(newTime);
   }
 
+  /** @private */
   handleVolumeInput() {
     this.audio.volume = this.volume.valueAsNumber;
   }
 
+  /** @private */
   setVolumeIcon() {
     if (this.audio.volume === 0 || this.audio.muted) {
       this.volumeIcon = "#icon--volumeOff";
@@ -504,6 +592,7 @@ export default class Plvylist extends LitElement {
     this.audio.muted = !this.audio.muted;
   }
 
+  /** @private */
   handleMediaSessionSeek(details) {
     switch (details.action) {
       case "seekforward":
@@ -519,12 +608,14 @@ export default class Plvylist extends LitElement {
     }
   }
 
+  /** @private */
   handleTrackTitleClick(event) {
     const { target } = event;
     const index = target.dataset.index;
     this.loadTrack(Number(index));
   }
 
+  /** @private */
   handleActionClick() {
     if (this.currentTrackIndex === undefined) {
       this.loadTrack(0);
@@ -542,6 +633,7 @@ export default class Plvylist extends LitElement {
     return this;
   }
 
+  /** @private */
   handleShuffle() {
     if (this.hasPlayed) {
       if (window.confirm("This will stop your current track and start you over fresh, okay?")) {
@@ -774,6 +866,10 @@ export default class Plvylist extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
+    this.handleActionClick = this.handleActionClick.bind(this);
+    this.loadPreviousTrack = this.loadPreviousTrack.bind(this);
+    this.loadNextTrack = this.loadNextTrack.bind(this);
+    this.handleMediaSessionSeek = this.handleMediaSessionSeek.bind(this);
     this.addMediaSessionActionHandlers();
     navigator.mediaSession.metadata = new MediaMetadata(null);
   }

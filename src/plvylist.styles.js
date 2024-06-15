@@ -106,7 +106,7 @@ export default css`
     border-radius: 50%;
     display: flex;
     stroke: var(--plvylist-color-button-stroke, currentColor);
-    padding: var(--space-3xs);
+    padding: var(--space-2xs);
     transition: color 0.1s ease;
   }
 
@@ -140,7 +140,7 @@ export default css`
   }
 
   .trackList__table {
-    border-collapse: collapse;
+    border-spacing: var(--space-2xs) var(--space-3xs);
     counter-reset: tracks;
     font-size: var(--plvylist-tracklist-font-size, unset);
     inline-size: 100%;
@@ -148,13 +148,7 @@ export default css`
   }
 
   .trackList__table :is(th, td) {
-    padding-block: var(--cell-padding, var(--space-3xs));
-    padding-inline: var(--space-2xs);
     text-align: start;
-  }
-
-  .trackList__table thead tr {
-    border-block-end: 1px solid;
   }
 
   .trackList__table th {
