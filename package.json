@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "plvylist",
-  "version": "3.1.1",
+  "version": "4.0.0",
   "description": "A web component for playing an album or multiple tracks in your site or app.",
   "main": "dist/plvylist.js",
   "exports": {
@@ -20,31 +20,36 @@
     "audio"
   ],
   "scripts": {
-    "start": "vite",
-    "vite::build": "vite build",
-    "vite::docs": "vite build --mode docs",
-    "preview::docs": "vite --mode docs",
-    "build": "npm-run-all prettier::format vite::build",
-    "prettier::lint": "prettier --check .",
-    "prettier::format": "prettier --write ."
+    "start": "npx vite",
+    "vite::build": "npx vite build",
+    "vite::docs": "npx vite build --mode docs",
+    "preview::docs": "npx vite --mode docs",
+    "prebuild": "npm run prettier::format",
+    "build": "npm run vite::build",
+    "prettier::lint": "npx prettier --check .",
+    "prettier::format": "npx prettier --write ."
   },
-  "author": "Troy Vassalotti",
+  "author": "Troy Vassalotti (https://www.troyv.dev/)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/troyvassalotti/plvylist/issues"
   },
   "homepage": "https://github.com/troyvassalotti/plvylist#readme",
+  "dependencies": {
+    "@lit/task": "^1.0.1",
+    "lit": "^3.1.4"
+  },
   "devDependencies": {
-    "api-viewer-element": "^1.0.0-pre.7",
     "cem-plugin-async-function": "^0.0.5",
-    "cem-plugin-jet-brains-ide-integration": "^1.0.0-beta.0",
     "cem-plugin-jsdoc-example": "^0.0.9",
-    "cem-plugin-vs-code-custom-data-generator": "^1.4.0",
     "common-tags": "^1.8.2",
-    "npm-run-all": "^4.1.5",
-    "prettier": "^2.5.1",
-    "vite": "^4.0.4",
-    "vite-plugin-cem": "^0.4.0"
+    "custom-element-jet-brains-integration": "^1.5.0",
+    "custom-element-vs-code-integration": "^1.3.0",
+    "markdown-it": "^14.1.0",
+    "prettier": "^3.3.2",
+    "vite": "^5.3.1",
+    "vite-plugin-cem": "^0.8.0",
+    "vite-plugin-nunjucks": "^0.2.0"
   },
   "customElements": "dist/custom-elements.json",
   "web-types": "dist/web-types.json"
