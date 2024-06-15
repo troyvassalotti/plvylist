@@ -13,7 +13,7 @@ const emptyData = "--";
  * @param {string} key Key to look for in array of objects.
  * @returns {Boolean}
  */
-const checkForKeyInArray = (arr, key) => arr?.find((obj) => Object.keys(obj).includes(key));
+const checkForKeyInArray = (arr, key) => arr?.some((obj) => Object.keys(obj).includes(key));
 
 /**
  * @element plvy-list
