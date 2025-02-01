@@ -64,6 +64,9 @@ const checkForKeyInArray = (arr, key) => arr?.some((obj) => Object.keys(obj).inc
  * @csspart next-button
  * @csspart loop-button
  *
+ * @slot artwork - Opt for full control over the HTML of the artwork.
+ * @slot - Child `<audio>` or `<plvy-list-track>` elements will be used as the data source if no file or dataset is provided.
+ *
  * @example
  * ```html
  * <!-- using a data file -->
@@ -74,6 +77,22 @@ const checkForKeyInArray = (arr, key) => arr?.some((obj) => Object.keys(obj).inc
  *   document.getElementById("plvylist").data = [...];
  * </script>
  * <plvy-list id="plvylist"></plvy-list>
+ *
+ * <!-- using slotted audio -->
+ * <plvy-list>
+ *   <audio controls src="" data-tile="" data-artist="" data-artist-url="" data-album="" data-album-url="" data-artwork=""></audio>
+ * </plvy-list>
+ *
+ * <!-- using slotted plvy-list-track elements -->
+ * <plvy-list>
+ *   <plvy-list-track>
+ *     <plvy-list-track-title>Song Name</plvy-list-track-title> by
+ *     <plvy-list-track-artist><a href="artist-url">Artist Name</a></plvy-list-track-artist> from the album
+ *     <plvy-list-track-album><a href="album-url">Album Name</a></plvy-list-track-album>
+ *     <plvy-list-track-artwork><img src="artwork" alt="" /></plvy-list-track-artwork>
+ *     <audio src="path-to-file.mp3"></audio>
+ *   </plvy-list-track>
+ * </plvy-list>
  * ```
  */
 export default class Plvylist extends LitElement {
@@ -336,22 +355,68 @@ export default class Plvylist extends LitElement {
 
   /**
    * @private
+   * @type {HTMLElement[]}
+   */
+  get plvylistTrackElements() {
+    return [...this.querySelectorAll("plvy-list-track")];
+  }
+
+  /**
+   * @private
+   * @type {HTMLAudioElement[]}
+   */
+  get audioElements() {
+    return [...this.querySelectorAll("audio")];
+  }
+
+  /**
+   * @private
    */
   fetchTracks = new Task(this, {
     task: async ([file, dataset], { signal }) => {
-      if (!file && !dataset) throw new Error("No data is available.");
-
       if (dataset) return dataset;
 
-      const response = await fetch(file, { signal });
+      if (file) {
+        const response = await fetch(file, { signal });
 
-      if (!response.ok) {
-        throw new Error(response.status);
+        if (!response.ok) {
+          throw new Error(response.status);
+        }
+
+        const data = await response.json();
+
+        return data;
       }
 
-      const data = await response.json();
+      if (this.plvylistTrackElements.length > 0) {
+        return this.plvylistTrackElements.map((track) => {
+          const file = track.querySelector("audio")?.src;
+          const title = track.querySelector("plvy-list-track-title")?.textContent;
+          const artistNode = track.querySelector("plvy-list-track-artist");
+          const artist = artistNode?.textContent;
+          const artistUrl = artistNode?.querySelector("a")?.href;
+          const albumNode = track.querySelector("plvy-list-track-album");
+          const album = albumNode?.textContent;
+          const albumUrl = albumNode?.querySelector("a")?.href;
+          const artworkNode = track.querySelector("plvy-list-track-artwork");
+          const artwork = artworkNode?.querySelector("img")?.src;
 
-      return data;
+          return { file, title, artist, artistUrl, album, albumUrl, artwork };
+        });
+      }
+
+      if (this.audioElements.length > 0) {
+        return this.audioElements.map((audio) => {
+          const {
+            src: file,
+            dataset: { title, artist, artistUrl, album, albumUrl, artwork },
+          } = audio;
+
+          return { file, title, artist, artistUrl, album, albumUrl, artwork };
+        });
+      }
+
+      throw new Error("No data is available.");
     },
     args: () => [this.file, this.data],
   });
@@ -904,17 +969,19 @@ export default class Plvylist extends LitElement {
             HTML Audio is not supported in your browser.
           </audio>
           <div class="meta" part="metadata">
-            <img
-              part="metadata-artwork"
-              src="${this.currentTrackArtwork || this.placeholder}"
-              alt="${this.currentTrackArtwork && this.currentTrackAlbum
-                ? `Album art for ${this.currentTrackAlbum}`
-                : ""}"
-              id="artwork"
-              width="350"
-              height="350"
-              loading="lazy"
-              decoding="async" />
+            <slot name="artwork">
+              <img
+                part="metadata-artwork"
+                src="${this.currentTrackArtwork || this.placeholder}"
+                alt="${this.currentTrackArtwork && this.currentTrackAlbum
+                  ? `Album art for ${this.currentTrackAlbum}`
+                  : ""}"
+                id="artwork"
+                width="350"
+                height="350"
+                loading="lazy"
+                decoding="async" />
+            </slot>
             <div class="trackInfo" part="metadata-trackinfo">
               <div class="trackInfo__track" part="metadata-track-title">
                 ${this.currentTrackTitle}

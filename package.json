@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "plvylist",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "A web component for playing an album or multiple tracks in your site or app.",
   "main": "dist/plvylist.js",
   "exports": {
@@ -36,19 +36,19 @@
   },
   "homepage": "https://github.com/troyvassalotti/plvylist#readme",
   "dependencies": {
-    "@lit/task": "^1.0.1",
-    "lit": "^3.1.4"
+    "@lit/task": "^1.0.2",
+    "lit": "^3.2.1"
   },
   "devDependencies": {
     "cem-plugin-async-function": "^0.0.5",
     "cem-plugin-jsdoc-example": "^0.0.9",
     "common-tags": "^1.8.2",
-    "custom-element-jet-brains-integration": "^1.5.0",
-    "custom-element-vs-code-integration": "^1.3.0",
+    "custom-element-jet-brains-integration": "^1.7.0",
+    "custom-element-vs-code-integration": "^1.5.0",
     "markdown-it": "^14.1.0",
-    "prettier": "^3.3.2",
-    "vite": "^5.3.1",
-    "vite-plugin-cem": "^0.8.0",
+    "prettier": "^3.4.2",
+    "vite": "^6.0.11",
+    "vite-plugin-cem": "^0.8.2",
     "vite-plugin-nunjucks": "^0.2.0"
   },
   "customElements": "dist/custom-elements.json",

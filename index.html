@@ -16,9 +16,123 @@
   <body class="container">
     <main>
       <section>{{ content | safe }}</section>
-      <section class="demo" id="demo">
-        <h2>Demo</h2>
+      <section class="demo" id="demo--property">
+        <h2>Demo (using JS property)</h2>
         <plvy-list id="plvylist" starting-volume="0.7"></plvy-list>
+      </section>
+      <section class="demo" id="demo--json">
+        <h2>Demo (using JSON property)</h2>
+        <plvy-list file="/tracks.json" starting-volume="0.7"></plvy-list>
+      </section>
+      <section class="demo" id="demo--slots">
+        <h2>Demo (using slotted artwork)</h2>
+        <plvy-list file="/tracks.json" starting-volume="0.7">
+          <img
+            src="https://images.unsplash.com/photo-1735919828669-f4895e667934?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3wzMjM4NDZ8MHwxfHJhbmRvbXx8fHx8fHx8fDE3Mzg0MTc1NDd8&ixlib=rb-4.0.3&q=80&w=400"
+            alt=""
+            slot="artwork" />
+        </plvy-list>
+      </section>
+      <section class="demo" id="demo--slotted">
+        <h2>Demo (using slotted audio)</h2>
+        <p>
+          This method makes it possible to still have playable audio files if and when JavaScript
+          fails.
+        </p>
+        <plvy-list starting-volume="0.7">
+          <audio
+            controls
+            src="https://res.cloudinary.com/dpmchqezv/video/upload/v1631305734/troy/alone-in-a-crowded-room/01_I_Know_I_m_Not_jvp3af.mp3"
+            data-title="I Know I'm Not"
+            data-artist="troyalllowercase"
+            data-artist-url="https://troyalllowercase.bandcamp.com/"
+            data-album="Alone In A Crowded Room"
+            data-album-url="https://troyalllowercase.bandcamp.com/album/alone-in-a-crowded-room"
+            data-artwork="https://res.cloudinary.com/dpmchqezv/image/upload/c_scale,f_auto,q_auto:eco,w_300/v1631306010/troy/alone-in-a-crowded-room/AIACR-troy_cwoizg.png"></audio>
+          <audio
+            controls
+            src="https://res.cloudinary.com/dpmchqezv/video/upload/v1631305724/troy/alone-in-a-crowded-room/02_Baby_Blue_lwf7zf.mp3"
+            data-title="Baby Blue"
+            data-artist="troyalllowercase"
+            data-artist-url="https://troyalllowercase.bandcamp.com/"
+            data-album="Alone In A Crowded Room"
+            data-album-url="https://troyalllowercase.bandcamp.com/album/alone-in-a-crowded-room"
+            data-artwork="https://res.cloudinary.com/dpmchqezv/image/upload/c_scale,f_auto,q_auto:eco,w_300/v1631306010/troy/alone-in-a-crowded-room/AIACR-troy_cwoizg.png"></audio>
+          <audio
+            controls
+            src="https://res.cloudinary.com/dpmchqezv/video/upload/v1631305729/troy/alone-in-a-crowded-room/03_Insincerity_x29pxf.mp3"
+            data-title="Insincerity"
+            data-artist="troyalllowercase"
+            data-artist-url="https://troyalllowercase.bandcamp.com/"
+            data-album="Alone In A Crowded Room"
+            data-album-url="https://troyalllowercase.bandcamp.com/album/alone-in-a-crowded-room"></audio>
+          <audio
+            controls
+            src="https://res.cloudinary.com/dpmchqezv/video/upload/v1631305723/troy/alone-in-a-crowded-room/04_Like_Sinking_ginqay.mp3"
+            data-title="Like Sinking"
+            data-artist="troyalllowercase"
+            data-artwork="https://res.cloudinary.com/dpmchqezv/image/upload/c_scale,f_auto,q_auto:eco,w_300/v1631306010/troy/alone-in-a-crowded-room/AIACR-troy_cwoizg.png"></audio>
+        </plvy-list>
+      </section>
+      <section class="demo" id="demo--slotted-tracks">
+        <h2>Demo (using <code>plvy-list-track</code> nodes)</h2>
+        <p>
+          This method allows you to display visible text for your tracks with audio files if and
+          when JavaScript fails. You get to style them as you wish too!
+        </p>
+        <style>
+          plvy-list-track {
+            display: flex;
+            flex-direction: column;
+          }
+        </style>
+        <plvy-list starting-volume="0.7">
+          <plvy-list-track>
+            <plvy-list-track-artwork>
+              <img
+                src="https://res.cloudinary.com/dpmchqezv/image/upload/c_scale,f_auto,q_auto:eco,w_300/v1631306010/troy/alone-in-a-crowded-room/AIACR-troy_cwoizg.png"
+                alt="" />
+            </plvy-list-track-artwork>
+            <div>
+              <plvy-list-track-title>I Know I'm Not</plvy-list-track-title>
+              <span>by</span>
+              <plvy-list-track-artist>
+                <a href="https://troyalllowercase.bandcamp.com">troyalllowercase</a>
+              </plvy-list-track-artist>
+              <span>from the album</span>
+              <plvy-list-track-album>
+                <a href="https://troyalllowercase.bandcamp.com/album/alone-in-a-crowded-room"
+                  >Alone In A Crowded Room</a
+                >
+              </plvy-list-track-album>
+            </div>
+            <audio
+              controls
+              src="https://res.cloudinary.com/dpmchqezv/video/upload/v1631305734/troy/alone-in-a-crowded-room/01_I_Know_I_m_Not_jvp3af.mp3"></audio>
+          </plvy-list-track>
+          <plvy-list-track>
+            <div>
+              <plvy-list-track-title>Baby Blue</plvy-list-track-title>
+              <span>by</span>
+              <plvy-list-track-artist>troyalllowercase</plvy-list-track-artist>
+              <span>from</span>
+              <plvy-list-track-album>Alone In A Crowded Room</plvy-list-track-album>
+            </div>
+            <audio
+              controls
+              src="https://res.cloudinary.com/dpmchqezv/video/upload/v1631305724/troy/alone-in-a-crowded-room/02_Baby_Blue_lwf7zf.mp3"></audio>
+          </plvy-list-track>
+          <plvy-list-track>
+            <plvy-list-track-title>Insincerity</plvy-list-track-title>
+            <audio
+              controls
+              src="https://res.cloudinary.com/dpmchqezv/video/upload/v1631305729/troy/alone-in-a-crowded-room/03_Insincerity_x29pxf.mp3"></audio>
+          </plvy-list-track>
+        </plvy-list>
+      </section>
+      <section class="demo" id="demo--error">
+        <h2>Demo (no data)</h2>
+        <plvy-list starting-volume="0.7"></plvy-list>
       </section>
       <section class="docs" id="docs">
         <header>
