@@ -1,7 +1,7 @@
 {
   "type": "module",
   "name": "plvylist",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "description": "A web component for playing an album or multiple tracks in your site or app.",
   "main": "dist/plvylist.js",
   "exports": {
