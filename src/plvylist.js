@@ -65,7 +65,7 @@ const checkForKeyInArray = (arr, key) => arr?.some((obj) => Object.keys(obj).inc
  * @csspart loop-button
  *
  * @slot artwork - Opt for full control over the HTML of the artwork.
- * @slot - Child `<audio>` elements will be used as the data source if no file or dataset is provided.
+ * @slot - Child `<audio>` or `<plvy-list-track>` elements will be used as the data source if no file or dataset is provided.
  *
  * @example
  * ```html
@@ -81,6 +81,17 @@ const checkForKeyInArray = (arr, key) => arr?.some((obj) => Object.keys(obj).inc
  * <!-- using slotted audio -->
  * <plvy-list>
  *   <audio controls src="" data-tile="" data-artist="" data-artist-url="" data-album="" data-album-url="" data-artwork=""></audio>
+ * </plvy-list>
+ *
+ * <!-- using slotted plvy-list-track elements -->
+ * <plvy-list>
+ *   <plvy-list-track>
+ *     <plvy-list-track-title>Song Name</plvy-list-track-title> by
+ *     <plvy-list-track-artist><a href="artist-url">Artist Name</a></plvy-list-track-artist> from the album
+ *     <plvy-list-track-album><a href="album-url">Album Name</a></plvy-list-track-album>
+ *     <plvy-list-track-artwork><img src="artwork" alt="" /></plvy-list-track-artwork>
+ *     <audio src="path-to-file.mp3"></audio>
+ *   </plvy-list-track>
  * </plvy-list>
  * ```
  */
@@ -344,6 +355,14 @@ export default class Plvylist extends LitElement {
 
   /**
    * @private
+   * @type {HTMLElement[]}
+   */
+  get plvylistTrackElements() {
+    return [...this.querySelectorAll("plvy-list-track")];
+  }
+
+  /**
+   * @private
    * @type {HTMLAudioElement[]}
    */
   get audioElements() {
@@ -367,6 +386,23 @@ export default class Plvylist extends LitElement {
         const data = await response.json();
 
         return data;
+      }
+
+      if (this.plvylistTrackElements.length > 0) {
+        return this.plvylistTrackElements.map((track) => {
+          const file = track.querySelector("audio")?.src;
+          const title = track.querySelector("plvy-list-track-title")?.textContent;
+          const artistNode = track.querySelector("plvy-list-track-artist");
+          const artist = artistNode?.textContent;
+          const artistUrl = artistNode?.querySelector("a")?.href;
+          const albumNode = track.querySelector("plvy-list-track-album");
+          const album = albumNode?.textContent;
+          const albumUrl = albumNode?.querySelector("a")?.href;
+          const artworkNode = track.querySelector("plvy-list-track-artwork");
+          const artwork = artworkNode?.querySelector("img")?.src;
+
+          return { file, title, artist, artistUrl, album, albumUrl, artwork };
+        });
       }
 
       if (this.audioElements.length > 0) {
